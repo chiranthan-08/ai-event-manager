@@ -1,7 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Play, MapPin, Calendar, Clock, Eye, ExternalLink, Wifi, Users, Star } from 'lucide-react';
-import Navbar from '../../components/common/Navbar';
-import Footer from '../../components/common/Footer';
 
 const categoryData = {
   Wedding: {
@@ -12,9 +10,9 @@ const categoryData = {
     bgGradient: 'from-pink-50 via-white to-rose-50',
     events: [
       { id: 'w1', title: 'Priya & Rahul Royal Wedding', venue: 'Taj Palace, Jaipur', date: '2026-08-25', time: '6:00 PM', status: 'live', viewers: 1240, rating: 4.9, youtubeUrl: 'https://www.youtube.com/embed/cMghyBApy6U', thumbnail: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=600&h=400&fit=crop', description: 'A grand Rajasthani wedding with 800+ guests, traditional rituals, and royal decor.' },
-      { id: 'w2', title: 'Anita & Meera Garden Wedding', venue: 'Leela Palace, Bangalore', date: '2026-08-28', time: '5:30 PM', status: 'upcoming', viewers: 0, rating: 4.8, youtubeUrl: 'https://www.youtube.com/embed/cMghyBApy6U', thumbnail: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=600&h=400&fit=crop', description: 'Intimate garden wedding with floral mandap and candlelit reception.' },
-      { id: 'w3', title: 'Kavya & Arjun Beach Wedding', venue: 'Grand Hyatt, Goa', date: '2026-09-02', time: '4:00 PM', status: 'live', viewers: 890, rating: 4.7, youtubeUrl: 'https://www.youtube.com/embed/cMghyBApy6U', thumbnail: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=600&h=400&fit=crop', description: 'Sunset beach wedding with white mandap and seashell decorations.' },
-      { id: 'w4', title: 'Neha & Vikram Heritage Wedding', venue: 'Umaid Bhawan, Jodhpur', date: '2026-09-05', time: '7:00 PM', status: 'upcoming', viewers: 0, rating: 5.0, youtubeUrl: 'https://www.youtube.com/embed/cMghyBApy6U', thumbnail: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=600&h=400&fit=crop', description: 'Palace wedding with horse carriage entry and fireworks display.' },
+      { id: 'w2', title: 'Anita & Meera Garden Wedding', venue: 'Leela Palace, Bangalore', date: '2026-08-28', time: '5:30 PM', status: 'upcoming', viewers: 0, rating: 4.8, youtubeUrl: 'https://www.youtube.com/embed/rCUY6uy3Q8w', thumbnail: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=600&h=400&fit=crop', description: 'Intimate garden wedding with floral mandap and candlelit reception.' },
+      { id: 'w3', title: 'Kavya & Arjun Beach Wedding', venue: 'Grand Hyatt, Goa', date: '2026-09-02', time: '4:00 PM', status: 'live', viewers: 890, rating: 4.7, youtubeUrl: 'https://www.youtube.com/embed/EPWdb7qSpJ0', thumbnail: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=600&h=400&fit=crop', description: 'Sunset beach wedding with white mandap and seashell decorations.' },
+      { id: 'w4', title: 'Neha & Vikram Heritage Wedding', venue: 'Umaid Bhawan, Jodhpur', date: '2026-09-05', time: '7:00 PM', status: 'upcoming', viewers: 0, rating: 5.0, youtubeUrl: 'https://www.youtube.com/embed/YkfZuX5I7rU', thumbnail: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=600&h=400&fit=crop', description: 'Palace wedding with horse carriage entry and fireworks display.' },
     ],
   },
   Birthday: {
@@ -39,8 +37,8 @@ const categoryData = {
     events: [
       { id: 'c1', title: 'TechSummit 2026', venue: 'BIEC, Bangalore', date: '2026-08-27', time: '9:00 AM', status: 'live', viewers: 3200, rating: 4.9, youtubeUrl: 'https://www.youtube.com/embed/tmuE61JG2L4', thumbnail: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&h=400&fit=crop', description: 'Annual tech conference with 2000+ attendees, LED stage, and live demos.' },
       { id: 'c2', title: 'Infosys Annual Day', venue: 'Phoenix MarketCity, Mumbai', date: '2026-09-04', time: '6:00 PM', status: 'upcoming', viewers: 0, rating: 4.7, youtubeUrl: 'https://www.youtube.com/embed/wpYUpvrmZpw', thumbnail: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&h=400&fit=crop', description: 'Corporate annual celebration with awards ceremony and live band performance.' },
-      { id: 'c3', title: 'Startup Launch Event', venue: 'WeWork, Hyderabad', date: '2026-08-29', time: '4:00 PM', status: 'live', viewers: 1800, rating: 4.6, youtubeUrl: 'https://www.youtube.com/embed/tmuE61JG2L4', thumbnail: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&h=400&fit=crop', description: 'Product launch with investor meet, live demo, and networking dinner.' },
-      { id: 'c4', title: 'Banking Conference', venue: 'ITC Maurya, Delhi', date: '2026-09-06', time: '10:00 AM', status: 'upcoming', viewers: 0, rating: 4.8, youtubeUrl: 'https://www.youtube.com/embed/wpYUpvrmZpw', thumbnail: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&h=400&fit=crop', description: 'Banking industry summit with keynote speakers and panel discussions.' },
+      { id: 'c3', title: 'Startup Launch Event', venue: 'WeWork, Hyderabad', date: '2026-08-29', time: '4:00 PM', status: 'live', viewers: 1800, rating: 4.6, youtubeUrl: 'https://www.youtube.com/embed/_jX-hKvUQDU', thumbnail: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&h=400&fit=crop', description: 'Product launch with investor meet, live demo, and networking dinner.' },
+      { id: 'c4', title: 'Banking Conference', venue: 'ITC Maurya, Delhi', date: '2026-09-06', time: '10:00 AM', status: 'upcoming', viewers: 0, rating: 4.8, youtubeUrl: 'https://www.youtube.com/embed/lqXQuo6qb1M', thumbnail: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&h=400&fit=crop', description: 'Banking industry summit with keynote speakers and panel discussions.' },
     ],
   },
   College: {
@@ -79,7 +77,7 @@ const categoryData = {
       { id: 'p1', title: 'Neon Night Club Party', venue: 'XTreme Sports Bar, Bangalore', date: '2026-08-25', time: '9:00 PM', status: 'live', viewers: 2100, rating: 4.7, youtubeUrl: 'https://www.youtube.com/embed/7l7sW2zxAM4', thumbnail: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=600&h=400&fit=crop', description: 'Neon glow party with DJ, laser show, and UV body paint.' },
       { id: 'p2', title: 'Rooftop Sunset Soirée', venue: 'Asilo, Mumbai', date: '2026-08-29', time: '5:00 PM', status: 'live', viewers: 1400, rating: 4.8, youtubeUrl: 'https://www.youtube.com/embed/e2KIIL0iVMk', thumbnail: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=600&h=400&fit=crop', description: 'Elegant rooftop party with cocktails, live saxophone, and sunset views.' },
       { id: 'p3', title: 'Pool Party Bash', venue: 'Radisson, Goa', date: '2026-09-01', time: '12:00 PM', status: 'upcoming', viewers: 0, rating: 4.6, youtubeUrl: 'https://www.youtube.com/embed/cTY5tbt0Exg', thumbnail: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=600&h=400&fit=crop', description: 'Poolside party with DJ, water games, BBQ, and tropical cocktails.' },
-      { id: 'p4', title: 'Masquerade Ball', venue: 'The Oberoi, Delhi', date: '2026-09-06', time: '8:00 PM', status: 'upcoming', viewers: 0, rating: 4.9, youtubeUrl: 'https://www.youtube.com/embed/7l7sW2zxAM4', thumbnail: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=600&h=400&fit=crop', description: 'Elegant masquerade theme with live band, dance floor, and grand prizes.' },
+      { id: 'p4', title: 'Masquerade Ball', venue: 'The Oberoi, Delhi', date: '2026-09-06', time: '8:00 PM', status: 'upcoming', viewers: 0, rating: 4.9, youtubeUrl: 'https://www.youtube.com/embed/wQHE97b9OkA', thumbnail: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=600&h=400&fit=crop', description: 'Elegant masquerade theme with live band, dance floor, and grand prizes.' },
     ],
   },
   Anniversary: {
@@ -89,10 +87,10 @@ const categoryData = {
     gradient: 'from-rose-500 to-red-600',
     bgGradient: 'from-rose-50 via-white to-red-50',
     events: [
-      { id: 'a1', title: 'Silver Jubilee Celebration', venue: 'Leela Palace, Udaipur', date: '2026-08-27', time: '7:00 PM', status: 'live', viewers: 680, rating: 4.9, youtubeUrl: 'https://www.youtube.com/embed/cMghyBApy6U', thumbnail: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=600&h=400&fit=crop', description: '25th anniversary with rose petal decor, candlelight dinner, and live violin.' },
-      { id: 'a2', title: 'Gold Anniversary Gala', venue: 'Taj Coromandel, Chennai', date: '2026-09-03', time: '6:30 PM', status: 'upcoming', viewers: 0, rating: 4.8, youtubeUrl: 'https://www.youtube.com/embed/iJWz2t575M8', thumbnail: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=600&h=400&fit=crop', description: '50th anniversary celebration with family tribute and grand reception.' },
-      { id: 'a3', title: 'First Anniversary Surprise', venue: 'Backwater Resort, Kerala', date: '2026-08-30', time: '5:00 PM', status: 'live', viewers: 420, rating: 4.7, youtubeUrl: 'https://www.youtube.com/embed/cMghyBApy6U', thumbnail: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=600&h=400&fit=crop', description: 'Houseboat surprise with rose petals, private dinner, and fireworks.' },
-      { id: 'a4', title: 'Grandparents Day Special', venue: 'Hyatt Regency, Pune', date: '2026-09-05', time: '11:00 AM', status: 'upcoming', viewers: 0, rating: 4.6, youtubeUrl: 'https://www.youtube.com/embed/iJWz2t575M8', thumbnail: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=600&h=400&fit=crop', description: 'Multi-generational family celebration with tribute video and live music.' },
+      { id: 'a1', title: 'Silver Jubilee Celebration', venue: 'Leela Palace, Udaipur', date: '2026-08-27', time: '7:00 PM', status: 'live', viewers: 680, rating: 4.9, youtubeUrl: 'https://www.youtube.com/embed/L7AuboM47hY', thumbnail: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=600&h=400&fit=crop', description: '25th anniversary with rose petal decor, candlelight dinner, and live violin.' },
+      { id: 'a2', title: 'Gold Anniversary Gala', venue: 'Taj Coromandel, Chennai', date: '2026-09-03', time: '6:30 PM', status: 'upcoming', viewers: 0, rating: 4.8, youtubeUrl: 'https://www.youtube.com/embed/5ZlYYMT5D3A', thumbnail: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=600&h=400&fit=crop', description: '50th anniversary celebration with family tribute and grand reception.' },
+      { id: 'a3', title: 'First Anniversary Surprise', venue: 'Backwater Resort, Kerala', date: '2026-08-30', time: '5:00 PM', status: 'live', viewers: 420, rating: 4.7, youtubeUrl: 'https://www.youtube.com/embed/db-UwvVU1to', thumbnail: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=600&h=400&fit=crop', description: 'Houseboat surprise with rose petals, private dinner, and fireworks.' },
+      { id: 'a4', title: 'Grandparents Day Special', venue: 'Hyatt Regency, Pune', date: '2026-09-05', time: '11:00 AM', status: 'upcoming', viewers: 0, rating: 4.6, youtubeUrl: 'https://www.youtube.com/embed/oTBILDCD1g0', thumbnail: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=600&h=400&fit=crop', description: 'Multi-generational family celebration with tribute video and live music.' },
     ],
   },
 };
@@ -107,7 +105,6 @@ export default function EventCategory() {
   if (!category) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-orange-50 via-white to-green-50">
-        <Navbar />
         <div className="flex flex-col items-center justify-center py-32">
           <span className="text-6xl mb-4">🪔</span>
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Category Not Found</h2>
@@ -116,7 +113,6 @@ export default function EventCategory() {
             Back to Home
           </Link>
         </div>
-        <Footer />
       </div>
     );
   }
@@ -126,7 +122,6 @@ export default function EventCategory() {
 
   return (
     <div className={`min-h-screen bg-gradient-to-b ${category.bgGradient}`}>
-      <Navbar />
 
       {/* Hero */}
       <div className={`relative bg-gradient-to-r ${category.gradient} py-20 overflow-hidden`}>
@@ -266,7 +261,6 @@ export default function EventCategory() {
         </div>
       </div>
 
-      <Footer />
     </div>
   );
 }

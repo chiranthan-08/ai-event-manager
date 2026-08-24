@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, MapPin, Clock, Users, Star, CheckCircle, Calendar, Phone, Mail, IndianRupee, Sparkles, Heart } from 'lucide-react';
-import Navbar from '../../components/common/Navbar';
-import Footer from '../../components/common/Footer';
 
 const allDecorations = [
   {
@@ -123,7 +121,6 @@ export default function DecorationDetail() {
   if (!decoration) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-orange-50 via-white to-green-50">
-        <Navbar />
         <div className="flex flex-col items-center justify-center py-32">
           <span className="text-6xl mb-4">🪔</span>
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Decoration Not Found</h2>
@@ -132,14 +129,12 @@ export default function DecorationDetail() {
             Back to Gallery
           </Link>
         </div>
-        <Footer />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-orange-50 via-white to-green-50">
-      <Navbar />
 
       {/* Hero Image */}
       <div className="relative h-[50vh] min-h-[400px] overflow-hidden">
@@ -277,7 +272,6 @@ export default function DecorationDetail() {
         </div>
       </div>
 
-      <Footer />
     </div>
   );
 }
