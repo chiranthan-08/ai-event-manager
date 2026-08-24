@@ -1,5 +1,14 @@
-import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 import { useAuth } from './context/AuthContext';
+
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+};
 
 import PublicLayout from './layouts/PublicLayout';
 import ClientLayout from './layouts/ClientLayout';
@@ -77,6 +86,8 @@ function App() {
   }
 
   return (
+    <>
+    <ScrollToTop />
     <Routes>
       <Route element={<PublicRoute />}>
         <Route path="/" element={<PublicLayout />}>
@@ -128,6 +139,7 @@ function App() {
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </>
   );
 }
 
