@@ -1,26 +1,27 @@
-import Employee from '../models/Employee.js';
-import User from '../models/User.js';
-import Event from '../models/Event.js';
+import db from '../utils/memoryDb.js';
 
 export const getEmployees = async (req, res) => {
   try {
     const { page = 1, limit = 10 } = req.query;
-    const skip = (Number(page) - 1) * Number(limit);
-    const total = await Employee.countDocuments();
 
-    const employees = await Employee.find()
-      .populate('user', 'name email phone')
-      .populate('assignedEvents', 'title date venue status')
-      .skip(skip)
-      .limit(Number(limit));
+    const allEmployees = db.findEmployees();
+    const total = allEmployees.length;
+    const skip = (Number(page) - 1) * Number(limit);
+    const paginated = allEmployees.slice(skip, skip + Number(limit));
+
+    const enriched = paginated.map((emp) => {
+      const user = emp.user ? db.findUserById(emp.user) : null;
+      const assignedEvents = (emp.assignedEvents || []).map((eid) => db.findEventById(eid)).filter(Boolean);
+      return { ...emp, user, assignedEvents };
+    });
 
     res.status(200).json({
       success: true,
-      count: employees.length,
+      count: enriched.length,
       total,
       totalPages: Math.ceil(total / Number(limit)),
       currentPage: Number(page),
-      employees,
+      employees: enriched,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error', error: error.message });
@@ -29,15 +30,16 @@ export const getEmployees = async (req, res) => {
 
 export const getEmployee = async (req, res) => {
   try {
-    const employee = await Employee.findById(req.params.id)
-      .populate('user', 'name email phone address')
-      .populate('assignedEvents', 'title date venue status capacity availableSeats');
+    const employee = db.findEmployeeById(req.params.id);
 
     if (!employee) {
       return res.status(404).json({ success: false, message: 'Employee not found' });
     }
 
-    res.status(200).json({ success: true, employee });
+    const user = employee.user ? db.findUserById(employee.user) : null;
+    const assignedEvents = (employee.assignedEvents || []).map((eid) => db.findEventById(eid)).filter(Boolean);
+
+    res.status(200).json({ success: true, employee: { ...employee, user, assignedEvents } });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }
@@ -47,19 +49,23 @@ export const createEmployee = async (req, res) => {
   try {
     const { userId, department, position, salary, joiningDate, skills, responsibilities } = req.body;
 
-    const user = await User.findById(userId);
+    const user = db.findUserById(userId);
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    const existingEmployee = await Employee.findOne({ user: userId });
+    const existingEmployee = db.findEmployeeByUser(userId);
     if (existingEmployee) {
       return res.status(400).json({ success: false, message: 'Employee profile already exists for this user' });
     }
 
-    await User.findByIdAndUpdate(userId, { role: 'employee' });
+    const employees = db.findEmployees();
+    const empIdx = employees.findIndex((e) => e.user === userId);
+    if (empIdx !== -1) {
+      employees[empIdx].role = 'employee';
+    }
 
-    const employee = await Employee.create({
+    const employee = db.createEmployee({
       user: userId,
       department,
       position,
@@ -67,12 +73,11 @@ export const createEmployee = async (req, res) => {
       joiningDate,
       skills,
       responsibilities,
+      assignedEvents: [],
     });
 
-    const populated = await Employee.findById(employee._id)
-      .populate('user', 'name email phone');
-
-    res.status(201).json({ success: true, employee: populated });
+    const userObj = db.findUserById(userId);
+    res.status(201).json({ success: true, employee: { ...employee, user: userObj } });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }
@@ -80,19 +85,25 @@ export const createEmployee = async (req, res) => {
 
 export const updateEmployee = async (req, res) => {
   try {
-    const employee = await Employee.findById(req.params.id);
+    const employee = db.findEmployeeById(req.params.id);
     if (!employee) {
       return res.status(404).json({ success: false, message: 'Employee not found' });
     }
 
-    const updatedEmployee = await Employee.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    })
-      .populate('user', 'name email phone')
-      .populate('assignedEvents', 'title date venue status');
+    const updatedEmployee = db.updateRegistration
+      ? { ...employee, ...req.body }
+      : { ...employee, ...req.body };
 
-    res.status(200).json({ success: true, employee: updatedEmployee });
+    const employees = db.findEmployees();
+    const idx = employees.findIndex((e) => (e._id || e.id) === req.params.id);
+    if (idx !== -1) {
+      Object.assign(employees[idx], req.body);
+    }
+
+    const user = updatedEmployee.user ? db.findUserById(updatedEmployee.user) : null;
+    const assignedEvents = (updatedEmployee.assignedEvents || []).map((eid) => db.findEventById(eid)).filter(Boolean);
+
+    res.status(200).json({ success: true, employee: { ...updatedEmployee, user, assignedEvents } });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }
@@ -100,21 +111,33 @@ export const updateEmployee = async (req, res) => {
 
 export const deleteEmployee = async (req, res) => {
   try {
-    const employee = await Employee.findById(req.params.id);
+    const employee = db.findEmployeeById(req.params.id);
     if (!employee) {
       return res.status(404).json({ success: false, message: 'Employee not found' });
     }
 
     if (employee.user) {
-      await User.findByIdAndUpdate(employee.user, { role: 'client' });
+      const users = db.findUsers({});
+      const idx = users.findIndex((u) => (u._id || u.id) === employee.user);
+      if (idx !== -1) {
+        users[idx].role = 'client';
+      }
     }
 
-    await Event.updateMany(
-      { assignedEmployees: req.params.id },
-      { $pull: { assignedEmployees: req.params.id } }
-    );
+    const events = db.findEvents({});
+    events.forEach((event) => {
+      if (event.assignedEmployees && event.assignedEmployees.includes(req.params.id)) {
+        db.updateEvent(event._id || event.id, {
+          assignedEmployees: event.assignedEmployees.filter((eid) => eid !== req.params.id),
+        });
+      }
+    });
 
-    await Employee.findByIdAndDelete(req.params.id);
+    const employees = db.findEmployees();
+    const empIdx = employees.findIndex((e) => (e._id || e.id) === req.params.id);
+    if (empIdx !== -1) {
+      employees.splice(empIdx, 1);
+    }
 
     res.status(200).json({ success: true, message: 'Employee removed successfully' });
   } catch (error) {
@@ -126,31 +149,41 @@ export const assignEvent = async (req, res) => {
   try {
     const { employeeId, eventId } = req.body;
 
-    const employee = await Employee.findById(employeeId);
+    const employee = db.findEmployeeById(employeeId);
     if (!employee) {
       return res.status(404).json({ success: false, message: 'Employee not found' });
     }
 
-    const event = await Event.findById(eventId);
+    const event = db.findEventById(eventId);
     if (!event) {
       return res.status(404).json({ success: false, message: 'Event not found' });
     }
 
-    if (event.assignedEmployees.includes(employeeId)) {
+    if (event.assignedEmployees && event.assignedEmployees.includes(employeeId)) {
       return res.status(400).json({ success: false, message: 'Employee already assigned to this event' });
     }
 
-    event.assignedEmployees.push(employeeId);
-    await event.save();
+    const eventAssignedEmployees = [...(event.assignedEmployees || []), employeeId];
+    db.updateEvent(eventId, { assignedEmployees: eventAssignedEmployees });
 
-    employee.assignedEvents.push(eventId);
-    await employee.save();
+    const employeeAssignedEvents = [...(employee.assignedEvents || []), eventId];
+    const employees = db.findEmployees();
+    const empIdx = employees.findIndex((e) => (e._id || e.id) === employeeId);
+    if (empIdx !== -1) {
+      employees[empIdx].assignedEvents = employeeAssignedEvents;
+    }
 
-    const updatedEvent = await Event.findById(eventId)
-      .populate('createdBy', 'name email')
-      .populate('assignedEmployees', 'name email');
+    const updatedEvent = db.findEventById(eventId);
+    const createdBy = updatedEvent.createdBy ? db.findUserById(updatedEvent.createdBy) : null;
+    const assignedEmployees = (updatedEvent.assignedEmployees || []).map((eid) => {
+      const emp = db.findEmployeeById(eid);
+      return emp && emp.user ? db.findUserById(emp.user) : null;
+    }).filter(Boolean);
 
-    res.status(200).json({ success: true, event: updatedEvent });
+    res.status(200).json({
+      success: true,
+      event: { ...updatedEvent, createdBy, assignedEmployees },
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }

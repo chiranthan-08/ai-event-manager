@@ -1,94 +1,82 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Mail, Lock, User, Eye, EyeOff, UserPlus } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { Mail, Lock, User, Phone, Eye, EyeOff, CalendarDays } from 'lucide-react';
 
-const Register = () => {
-  const navigate = useNavigate();
-  const { register } = useAuth();
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    password: '',
-    confirmPassword: '',
-  });
+export default function Register() {
+  const [formData, setFormData] = useState({ name: '', email: '', password: '', confirmPassword: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { register } = useAuth();
+  const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (formData.password !== formData.confirmPassword) {
       alert('Passwords do not match');
       return;
     }
-
     setLoading(true);
     try {
-      await register({
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        password: formData.password,
-      });
-      navigate('/client/dashboard');
-    } catch {
-      // Error handled by AuthContext
+      await register({ name: formData.name, email: formData.email, password: formData.password });
+      navigate('/login');
+    } catch (err) {
+      // Error handled by auth context
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
-      <div className="max-w-md w-full">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-green-50 flex items-center justify-center py-12 px-4 relative overflow-hidden">
+      <div className="absolute top-10 right-10 text-6xl opacity-10">🪔</div>
+      <div className="absolute bottom-10 left-10 text-6xl opacity-10">🪔</div>
+
+      <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center gap-2">
-            <CalendarDays className="w-10 h-10 text-primary-600" />
-            <span className="text-2xl font-bold text-gray-900">AI Event Manager</span>
+          <Link to="/" className="inline-flex items-center gap-3">
+            <div className="w-14 h-14 bg-gradient-to-br from-saffron-500 to-amber-500 rounded-2xl flex items-center justify-center shadow-lg">
+              <span className="text-3xl">🪔</span>
+            </div>
           </Link>
-          <h2 className="mt-6 text-3xl font-bold text-gray-900">Create your account</h2>
-          <p className="mt-2 text-gray-600">
-            Already have an account?{' '}
-            <Link to="/login" className="text-primary-600 hover:text-primary-700 font-medium">
-              Sign in here
-            </Link>
-          </p>
+          <h1 className="text-3xl font-bold text-gray-800 mt-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+            Create Account
+          </h1>
+          <p className="text-gray-500 mt-2">Join us and start celebrating</p>
         </div>
 
-        <div className="card">
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
+          <div className="h-1 bg-gradient-to-r from-saffron-500 via-white to-indian-green rounded-full mb-8"></div>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="label">Full name</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="text"
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  className="input-field pl-10"
-                  placeholder="John Doe"
+                  className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-saffron-500 focus:border-transparent outline-none"
+                  placeholder="Enter your name"
                   required
                 />
               </div>
             </div>
 
             <div>
-              <label className="label">Email address</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="input-field pl-10"
+                  className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-saffron-500 focus:border-transparent outline-none"
                   placeholder="you@example.com"
                   required
                 />
@@ -96,55 +84,40 @@ const Register = () => {
             </div>
 
             <div>
-              <label className="label">Phone number</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
               <div className="relative">
-                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  className="input-field pl-10"
-                  placeholder="+91 98765 43210"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="label">Password</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className="input-field pl-10 pr-10"
-                  placeholder="••••••••"
+                  className="w-full pl-12 pr-12 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-saffron-500 focus:border-transparent outline-none"
+                  placeholder="Min 6 characters"
                   required
                   minLength={6}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
             </div>
 
             <div>
-              <label className="label">Confirm password</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
-                  type={showPassword ? 'text' : 'password'}
+                  type="password"
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  className="input-field pl-10"
-                  placeholder="••••••••"
+                  className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-saffron-500 focus:border-transparent outline-none"
+                  placeholder="Confirm your password"
                   required
                 />
               </div>
@@ -153,15 +126,27 @@ const Register = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full btn-primary"
+              className="w-full btn-indian text-white py-3 rounded-xl font-semibold text-lg flex items-center justify-center gap-2 shadow-lg disabled:opacity-50"
             >
-              {loading ? 'Creating account...' : 'Create account'}
+              {loading ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                <>
+                  <UserPlus className="w-5 h-5" />
+                  Create Account
+                </>
+              )}
             </button>
           </form>
         </div>
+
+        <p className="text-center mt-6 text-gray-600">
+          Already have an account?{' '}
+          <Link to="/login" className="text-saffron-500 hover:text-saffron-600 font-semibold">
+            Login here
+          </Link>
+        </p>
       </div>
     </div>
   );
-};
-
-export default Register;
+}

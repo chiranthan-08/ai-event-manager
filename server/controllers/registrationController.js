@@ -1,13 +1,11 @@
-import Registration from '../models/Registration.js';
-import Event from '../models/Event.js';
-import { generateTicketId, calculateRefundEligibility } from '../utils/helpers.js';
+import db from '../utils/memoryDb.js';
 
 export const createRegistration = async (req, res) => {
   try {
     const { eventId, numberOfSeats } = req.body;
     const userId = req.user.id;
 
-    const event = await Event.findById(eventId);
+    const event = db.findEventById(eventId);
     if (!event) {
       return res.status(404).json({ success: false, message: 'Event not found' });
     }
@@ -27,23 +25,28 @@ export const createRegistration = async (req, res) => {
       });
     }
 
-    const existingRegistration = await Registration.findOne({
+    const existingRegistrations = db.findRegistrations({
       user: userId,
       event: eventId,
-      status: { $in: ['confirmed', 'pending'] },
+      status: 'confirmed',
     });
-
-    if (existingRegistration) {
+    const pendingRegistrations = db.findRegistrations({
+      user: userId,
+      event: eventId,
+      status: 'pending',
+    });
+    const existing = [...existingRegistrations, ...pendingRegistrations];
+    if (existing.length > 0) {
       return res.status(400).json({
         success: false,
         message: 'You already have an active registration for this event',
       });
     }
 
-    const ticketId = generateTicketId();
+    const ticketId = 'TKT-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8).toUpperCase();
     const totalAmount = event.ticketPrice * numberOfSeats;
 
-    const registration = await Registration.create({
+    const registration = db.createRegistration({
       user: userId,
       event: eventId,
       numberOfSeats,
@@ -52,13 +55,11 @@ export const createRegistration = async (req, res) => {
       status: 'pending',
     });
 
-    event.availableSeats -= numberOfSeats;
-    await event.save();
+    db.updateEvent(eventId, {
+      availableSeats: event.availableSeats - numberOfSeats,
+    });
 
-    const populated = await Registration.findById(registration._id)
-      .populate('event', 'title date venue ticketPrice');
-
-    res.status(201).json({ success: true, registration: populated });
+    res.status(201).json({ success: true, registration });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }
@@ -67,24 +68,26 @@ export const createRegistration = async (req, res) => {
 export const getMyRegistrations = async (req, res) => {
   try {
     const { page = 1, limit = 10 } = req.query;
+
+    const allRegistrations = db.findRegistrations({ user: req.user.id });
+    const sorted = allRegistrations.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    const total = sorted.length;
     const skip = (Number(page) - 1) * Number(limit);
+    const registrations = sorted.slice(skip, skip + Number(limit));
 
-    const filter = { user: req.user.id };
-    const total = await Registration.countDocuments(filter);
-
-    const registrations = await Registration.find(filter)
-      .populate('event', 'title date venue category ticketPrice images status')
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(Number(limit));
+    const enriched = registrations.map((reg) => {
+      const event = reg.event ? db.findEventById(reg.event) : null;
+      return { ...reg, event };
+    });
 
     res.status(200).json({
       success: true,
-      count: registrations.length,
+      count: enriched.length,
       total,
       totalPages: Math.ceil(total / Number(limit)),
       currentPage: Number(page),
-      registrations,
+      registrations: enriched,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error', error: error.message });
@@ -93,14 +96,13 @@ export const getMyRegistrations = async (req, res) => {
 
 export const cancelRegistration = async (req, res) => {
   try {
-    const registration = await Registration.findById(req.params.id)
-      .populate('event', 'date title');
+    const registration = db.findRegistrationById(req.params.id);
 
     if (!registration) {
       return res.status(404).json({ success: false, message: 'Registration not found' });
     }
 
-    if (registration.user.toString() !== req.user.id && req.user.role !== 'admin') {
+    if (registration.user !== req.user.id && req.user.role !== 'admin') {
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
 
@@ -108,7 +110,8 @@ export const cancelRegistration = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Registration is already cancelled' });
     }
 
-    const eventDate = new Date(registration.event.date);
+    const event = db.findEventById(registration.event);
+    const eventDate = event ? new Date(event.date) : new Date();
     const hoursUntilEvent = (eventDate - new Date()) / (1000 * 60 * 60);
 
     if (hoursUntilEvent <= 48 && req.user.role !== 'admin') {
@@ -118,24 +121,25 @@ export const cancelRegistration = async (req, res) => {
       });
     }
 
-    const refundEligible = calculateRefundEligibility(eventDate);
+    const refundEligible = hoursUntilEvent > 48;
 
-    registration.status = 'cancelled';
-    registration.cancelledAt = new Date();
-    registration.refundEligible = refundEligible;
-    await registration.save();
+    db.updateRegistration(req.params.id, {
+      status: 'cancelled',
+      cancelledAt: new Date().toISOString(),
+      refundEligible,
+    });
 
-    const event = await Event.findById(registration.event._id);
     if (event) {
-      event.availableSeats += registration.numberOfSeats;
-      await event.save();
+      db.updateEvent(event._id || event.id, {
+        availableSeats: event.availableSeats + registration.numberOfSeats,
+      });
     }
 
     res.status(200).json({
       success: true,
       message: 'Registration cancelled successfully',
       refundEligible,
-      registration,
+      registration: db.findRegistrationById(req.params.id),
     });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error', error: error.message });
@@ -147,7 +151,7 @@ export const getEventRegistrations = async (req, res) => {
     const { eventId } = req.params;
     const { page = 1, limit = 10, status } = req.query;
 
-    const event = await Event.findById(eventId);
+    const event = db.findEventById(eventId);
     if (!event) {
       return res.status(404).json({ success: false, message: 'Event not found' });
     }
@@ -155,22 +159,25 @@ export const getEventRegistrations = async (req, res) => {
     const filter = { event: eventId };
     if (status) filter.status = status;
 
-    const skip = (Number(page) - 1) * Number(limit);
-    const total = await Registration.countDocuments(filter);
+    let registrations = db.findRegistrations(filter);
+    registrations = registrations.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-    const registrations = await Registration.find(filter)
-      .populate('user', 'name email phone')
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(Number(limit));
+    const total = registrations.length;
+    const skip = (Number(page) - 1) * Number(limit);
+    const paginated = registrations.slice(skip, skip + Number(limit));
+
+    const enriched = paginated.map((reg) => {
+      const user = db.findUserById(reg.user);
+      return { ...reg, user: user ? { name: user.name, email: user.email, phone: user.phone } : null };
+    });
 
     res.status(200).json({
       success: true,
-      count: registrations.length,
+      count: enriched.length,
       total,
       totalPages: Math.ceil(total / Number(limit)),
       currentPage: Number(page),
-      registrations,
+      registrations: enriched,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error', error: error.message });

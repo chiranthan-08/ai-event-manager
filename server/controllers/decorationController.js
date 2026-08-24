@@ -1,28 +1,26 @@
-import Decoration from '../models/Decoration.js';
+import db from '../utils/memoryDb.js';
 
 export const getDecorations = async (req, res) => {
   try {
     const { category, page = 1, limit = 10 } = req.query;
+
+    const allDecorations = db.findDecorations(category);
+    const total = allDecorations.length;
     const skip = (Number(page) - 1) * Number(limit);
+    const paginated = allDecorations.slice(skip, skip + Number(limit));
 
-    const filter = {};
-    if (category) filter.category = category;
-
-    const total = await Decoration.countDocuments(filter);
-
-    const decorations = await Decoration.find(filter)
-      .populate('addedBy', 'name email')
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(Number(limit));
+    const enriched = paginated.map((dec) => {
+      const addedBy = dec.addedBy ? db.findUserById(dec.addedBy) : null;
+      return { ...dec, addedBy };
+    });
 
     res.status(200).json({
       success: true,
-      count: decorations.length,
+      count: enriched.length,
       total,
       totalPages: Math.ceil(total / Number(limit)),
       currentPage: Number(page),
-      decorations,
+      decorations: enriched,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error', error: error.message });
@@ -33,7 +31,7 @@ export const createDecoration = async (req, res) => {
   try {
     const { title, description, category, imageUrl, price, tags } = req.body;
 
-    const decoration = await Decoration.create({
+    const decoration = db.createDecoration({
       title,
       description,
       category,
@@ -43,10 +41,8 @@ export const createDecoration = async (req, res) => {
       addedBy: req.user.id,
     });
 
-    const populated = await Decoration.findById(decoration._id)
-      .populate('addedBy', 'name email');
-
-    res.status(201).json({ success: true, decoration: populated });
+    const addedBy = db.findUserById(req.user.id);
+    res.status(201).json({ success: true, decoration: { ...decoration, addedBy } });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }
@@ -54,13 +50,11 @@ export const createDecoration = async (req, res) => {
 
 export const deleteDecoration = async (req, res) => {
   try {
-    const decoration = await Decoration.findById(req.params.id);
+    const deleted = db.deleteDecoration(req.params.id);
 
-    if (!decoration) {
+    if (!deleted) {
       return res.status(404).json({ success: false, message: 'Decoration not found' });
     }
-
-    await Decoration.findByIdAndDelete(req.params.id);
 
     res.status(200).json({ success: true, message: 'Decoration deleted successfully' });
   } catch (error) {
