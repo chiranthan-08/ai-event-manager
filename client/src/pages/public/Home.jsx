@@ -167,7 +167,7 @@ export default function Home() {
                     <img src="https://images.unsplash.com/photo-1519741497674-611481863552?w=400&h=300&fit=crop" alt="Wedding" className="w-full h-48 object-cover" />
                   </div>
                   <div className="rounded-2xl overflow-hidden shadow-2xl card-hover">
-                    <img src="https://images.unsplash.com/photo-1606503153255-59d8b2e4b9e4?w=400&h=200&fit=crop" alt="Festival" className="w-full h-32 object-cover" />
+                    <img src="https://images.unsplash.com/photo-1551818255-e6e10975bc17?w=400&h=200&fit=crop" alt="Festival" className="w-full h-32 object-cover" />
                   </div>
                 </div>
                 <div className="space-y-4 mt-8">
@@ -181,7 +181,7 @@ export default function Home() {
               </div>
 
               {/* Floating Card */}
-              <div className="absolute -bottom-6 -left-6 bg-white rounded-2xl shadow-xl p-4 animate-float">
+              <Link to="/ai-assistant" className="absolute -bottom-6 -left-6 bg-white rounded-2xl shadow-xl p-4 animate-float hover:shadow-2xl transition-shadow cursor-pointer">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-gradient-to-br from-saffron-500 to-amber-500 rounded-full flex items-center justify-center">
                     <Sparkles className="w-6 h-6 text-white" />
@@ -191,7 +191,7 @@ export default function Home() {
                     <div className="text-sm text-gray-500">Smart Suggestions</div>
                   </div>
                 </div>
-              </div>
+              </Link>
             </div>
           </div>
         </div>

@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Sparkles, Send, Loader2, Lightbulb, Palette, DollarSign } from 'lucide-react';
 import { getEventSuggestions } from '../../services/aiService';
+import Navbar from '../../components/common/Navbar';
+import Footer from '../../components/common/Footer';
 import toast from 'react-hot-toast';
 
 const parseUserInput = (text) => {
@@ -115,6 +117,7 @@ const AIAssistant = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-saffron-50 via-white to-green-50">
+      <Navbar />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-gradient-to-br from-saffron-500 to-amber-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
@@ -201,6 +204,7 @@ const AIAssistant = () => {
           </form>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

@@ -120,9 +120,7 @@ function App() {
         </Route>
       </Route>
 
-      <Route path="/ai-assistant" element={<PublicLayout />}>
-        <Route index element={<AIAssistant />} />
-      </Route>
+      <Route path="/ai-assistant" element={<AIAssistant />} />
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
