@@ -1,4 +1,6 @@
 import dns from 'dns';
+dns.setServers(['8.8.8.8', '8.8.4.4']);
+
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -10,8 +12,6 @@ import bcrypt from 'bcryptjs';
 
 dotenv.config();
 
-dns.setServers(['8.8.8.8', '8.8.4.4']);
-
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -20,7 +20,7 @@ const connectDB = async () => {
   try {
     const conn = await mongoose.connect(process.env.MONGODB_URI, {
       maxPoolSize: 10,
-      serverSelectionTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 15000,
       socketTimeoutMS: 45000,
     });
     console.log(`MongoDB Connected: ${conn.connection.host}`);

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, LogIn } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -9,18 +9,14 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
-  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const user = await login(email, password);
-      if (user?.role === 'admin') navigate('/admin/dashboard');
-      else if (user?.role === 'employee') navigate('/employee/dashboard');
-      else navigate('/client/dashboard');
+      await login(email, password);
     } catch (err) {
-      // Error handled by auth context
+      // Error handled by auth context toast
     } finally {
       setLoading(false);
     }

@@ -5,8 +5,8 @@
   "type": "module",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+    "start": "node --dns-result-order=ipv4first server.js",
+    "dev": "nodemon --node-options=--dns-result-order=ipv4first server.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
