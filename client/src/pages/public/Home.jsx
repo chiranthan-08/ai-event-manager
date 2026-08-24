@@ -25,7 +25,7 @@ const featuredEvents = [
     location: 'Pune',
     ticketPrice: 500,
     availableSeats: 800,
-    image: 'https://images.unsplash.com/photo-1567880564951-5ea4251fd4be?w=600&h=400&fit=crop',
+    image: 'https://images.unsplash.com/photo-1551818255-e6e10975bc17?w=600&h=400&fit=crop',
   },
   {
     id: '3',
@@ -58,7 +58,7 @@ const categories = [
   { name: 'Birthday', icon: '🎂', color: 'from-purple-500 to-indigo-600', count: 8, image: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=300&h=200&fit=crop' },
   { name: 'Corporate', icon: '💼', color: 'from-blue-500 to-cyan-600', count: 15, image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=300&h=200&fit=crop' },
   { name: 'College', icon: '🎓', color: 'from-green-500 to-emerald-600', count: 6, image: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=300&h=200&fit=crop' },
-  { name: 'Festival', icon: '🪔', color: 'from-saffron-500 to-amber-600', count: 10, image: 'https://images.unsplash.com/photo-1567880564951-5ea4251fd4be?w=300&h=200&fit=crop' },
+  { name: 'Festival', icon: '🪔', color: 'from-saffron-500 to-amber-600', count: 10, image: 'https://images.unsplash.com/photo-1551818255-e6e10975bc17?w=300&h=200&fit=crop' },
   { name: 'Party', icon: '🎉', color: 'from-red-500 to-pink-600', count: 9, image: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=300&h=200&fit=crop' },
 ];
 
@@ -74,7 +74,7 @@ const galleryImages = [
   { url: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=400&h=300&fit=crop', title: 'Party Night' },
   { url: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=300&fit=crop', title: 'Corporate Event' },
   { url: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=400&h=300&fit=crop', title: 'Birthday Bash' },
-  { url: 'https://images.unsplash.com/photo-1567880564951-5ea4251fd4be?w=400&h=300&fit=crop', title: 'Festival Celebration' },
+  { url: 'https://images.unsplash.com/photo-1551818255-e6e10975bc17?w=400&h=300&fit=crop', title: 'Festival Celebration' },
 ];
 
 export default function Home() {

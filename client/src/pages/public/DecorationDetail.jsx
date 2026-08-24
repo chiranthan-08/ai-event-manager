@@ -33,7 +33,7 @@ const allDecorations = [
     contact: { phone: '+91 98765 43212', email: 'corporate@aievent.com' },
   },
   {
-    id: 4, title: 'Diwali Rangoli Display', category: 'Festival', image: 'https://images.unsplash.com/photo-1567880564951-5ea4251fd4be?w=600&h=400&fit=crop',
+    id: 4, title: 'Diwali Rangoli Display', category: 'Festival', image: 'https://images.unsplash.com/photo-1551818255-e6e10975bc17?w=600&h=400&fit=crop',
     description: 'Traditional rangoli decoration for Diwali celebrations with diyas',
     price: '₹15,000 - ₹35,000', duration: '1 Day', capacity: '100-300 guests',
     venue: 'Indoor / Outdoor', rating: 4.7, reviews: 156,
