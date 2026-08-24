@@ -10,6 +10,7 @@ import Home from './pages/public/Home';
 import Events from './pages/public/Events';
 import EventDetail from './pages/public/EventDetail';
 import EmployeeDetail from './pages/public/EmployeeDetail';
+import DecorationDetail from './pages/public/DecorationDetail';
 import Decorations from './pages/public/Decorations';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
@@ -83,6 +84,7 @@ function App() {
           <Route path="events/:id" element={<EventDetail />} />
           <Route path="employees/:id" element={<EmployeeDetail />} />
           <Route path="decorations" element={<Decorations />} />
+          <Route path="decorations/:id" element={<DecorationDetail />} />
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
         </Route>

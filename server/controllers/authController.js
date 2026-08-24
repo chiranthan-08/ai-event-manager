@@ -15,7 +15,7 @@ const generateToken = (user) => {
 
 export const register = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({ success: false, message: 'Please provide name, email and password' });
@@ -30,7 +30,10 @@ export const register = async (req, res) => {
       return res.status(400).json({ success: false, message: 'User already exists with this email' });
     }
 
-    const user = await User.create({ name, email, password, role: 'client', profileImage: '' });
+    const validRoles = ['admin', 'employee', 'client'];
+    const userRole = validRoles.includes(role) ? role : 'client';
+
+    const user = await User.create({ name, email, password, role: userRole, profileImage: '' });
     const token = generateToken(user);
 
     res.status(201).json({

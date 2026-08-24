@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Sparkles, Eye, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Sparkles, Eye } from 'lucide-react';
 
 const decorations = [
   { id: 1, title: 'Wedding Floral Arch', category: 'Wedding', image: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=600&h=400&fit=crop', description: 'Beautiful floral arch decoration for wedding ceremonies with fresh roses and marigolds' },
@@ -20,7 +21,7 @@ const categories = ['All', 'Wedding', 'Birthday', 'Corporate', 'Festival', 'Anni
 
 export default function Decorations() {
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [lightbox, setLightbox] = useState(null);
+  const navigate = useNavigate();
 
   const filtered = selectedCategory === 'All'
     ? decorations
@@ -71,7 +72,7 @@ export default function Decorations() {
             <div
               key={item.id}
               className="group relative rounded-2xl overflow-hidden shadow-lg card-hover cursor-pointer"
-              onClick={() => setLightbox(item)}
+              onClick={() => navigate(`/decorations/${item.id}`)}
             >
               <img src={item.image} alt={item.title} className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -87,25 +88,6 @@ export default function Decorations() {
           ))}
         </div>
       </div>
-
-      {/* Lightbox */}
-      {lightbox && (
-        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4" onClick={() => setLightbox(null)}>
-          <div className="bg-white rounded-3xl overflow-hidden max-w-2xl w-full card-hover" onClick={(e) => e.stopPropagation()}>
-            <img src={lightbox.image} alt={lightbox.title} className="w-full h-80 object-cover" />
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs bg-saffron-100 text-saffron-600 px-3 py-1 rounded-full font-medium">{lightbox.category}</span>
-                <button onClick={() => setLightbox(null)} className="text-gray-400 hover:text-gray-600">
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-800 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>{lightbox.title}</h3>
-              <p className="text-gray-500">{lightbox.description}</p>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -1,11 +1,17 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, Eye, EyeOff, UserPlus, CheckCircle } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff, UserPlus, CheckCircle, Shield, Briefcase, Users } from 'lucide-react';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 
+const roles = [
+  { value: 'client', label: 'Client', icon: Users, description: 'Book events & services' },
+  { value: 'employee', label: 'Employee', icon: Briefcase, description: 'Manage events & tasks' },
+  { value: 'admin', label: 'Admin', icon: Shield, description: 'Full system access' },
+];
+
 export default function Register() {
-  const [formData, setFormData] = useState({ name: '', email: '', password: '', confirmPassword: '' });
+  const [formData, setFormData] = useState({ name: '', email: '', password: '', confirmPassword: '', role: 'client' });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -21,7 +27,12 @@ export default function Register() {
     }
     setLoading(true);
     try {
-      await api.post('/auth/register', { name: formData.name, email: formData.email, password: formData.password });
+      await api.post('/auth/register', {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        role: formData.role,
+      });
       toast.success('Account created! Please login.');
       setSuccess(true);
       setTimeout(() => navigate('/login'), 1500);
@@ -61,6 +72,36 @@ export default function Register() {
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Role Selection */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">I want to join as</label>
+                <div className="grid grid-cols-3 gap-3">
+                  {roles.map((role) => {
+                    const Icon = role.icon;
+                    return (
+                      <button
+                        key={role.value}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, role: role.value })}
+                        className={`p-3 rounded-xl border-2 text-center transition-all ${
+                          formData.role === role.value
+                            ? 'border-saffron-500 bg-saffron-50 shadow-md'
+                            : 'border-gray-200 hover:border-saffron-300 hover:bg-gray-50'
+                        }`}
+                      >
+                        <Icon className={`w-6 h-6 mx-auto mb-1 ${
+                          formData.role === role.value ? 'text-saffron-500' : 'text-gray-400'
+                        }`} />
+                        <p className={`text-xs font-bold ${
+                          formData.role === role.value ? 'text-saffron-600' : 'text-gray-600'
+                        }`}>{role.label}</p>
+                        <p className="text-[10px] text-gray-400 mt-0.5 hidden sm:block">{role.description}</p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
                 <div className="relative">
