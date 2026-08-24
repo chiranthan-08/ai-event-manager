@@ -22,11 +22,28 @@ const colorClasses = {
     icon: 'bg-amber-100 text-amber-600',
     text: 'text-amber-600',
   },
+  orange: {
+    bg: 'bg-orange-50',
+    icon: 'bg-orange-100 text-orange-600',
+    text: 'text-orange-600',
+  },
+  emerald: {
+    bg: 'bg-emerald-50',
+    icon: 'bg-emerald-100 text-emerald-600',
+    text: 'text-emerald-600',
+  },
 };
+
+function getColorKey(color) {
+  if (colorClasses[color]) return color;
+  const match = color.match(/bg-(\w+)-\d+/);
+  if (match && colorClasses[match[1]]) return match[1];
+  return 'blue';
+}
 
 export default function DashboardStats({ icon: Icon, label, value, change, color = 'blue' }) {
   const [displayValue, setDisplayValue] = useState(0);
-  const colors = colorClasses[color] || colorClasses.blue;
+  const colors = colorClasses[getColorKey(color)] || colorClasses.blue;
 
   useEffect(() => {
     const target = Number(value) || 0;

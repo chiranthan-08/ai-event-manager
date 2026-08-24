@@ -1,13 +1,14 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-export default function Pagination({ currentPage, totalPages, onPageChange }) {
+export default function Pagination({ currentPage, page, totalPages, onPageChange }) {
+  const current = currentPage || page || 1;
   if (totalPages <= 1) return null;
 
   const getPages = () => {
     const pages = [];
     const delta = 1;
-    const left = currentPage - delta;
-    const right = currentPage + delta;
+    const left = current - delta;
+    const right = current + delta;
 
     pages.push(1);
 
@@ -27,8 +28,8 @@ export default function Pagination({ currentPage, totalPages, onPageChange }) {
   return (
     <div className="flex items-center justify-center gap-1">
       <button
-        onClick={() => onPageChange(currentPage - 1)}
-        disabled={currentPage === 1}
+        onClick={() => onPageChange(current - 1)}
+        disabled={current === 1}
         className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
       >
         <ChevronLeft className="w-5 h-5" />
@@ -44,7 +45,7 @@ export default function Pagination({ currentPage, totalPages, onPageChange }) {
             key={page}
             onClick={() => onPageChange(page)}
             className={`min-w-[36px] h-9 rounded-lg text-sm font-medium transition-all ${
-              currentPage === page
+              current === page
                 ? 'bg-violet-600 text-white shadow-sm'
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
@@ -55,8 +56,8 @@ export default function Pagination({ currentPage, totalPages, onPageChange }) {
       )}
 
       <button
-        onClick={() => onPageChange(currentPage + 1)}
-        disabled={currentPage === totalPages}
+        onClick={() => onPageChange(current + 1)}
+        disabled={current === totalPages}
         className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
       >
         <ChevronRight className="w-5 h-5" />

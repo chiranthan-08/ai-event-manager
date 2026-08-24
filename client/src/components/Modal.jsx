@@ -10,7 +10,7 @@ const sizes = {
 };
 
 export default function Modal({
-  isOpen,
+  isOpen = true,
   onClose,
   title,
   children,

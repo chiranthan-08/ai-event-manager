@@ -53,6 +53,28 @@ const paymentSchema = new mongoose.Schema(
       default: 0,
       min: [0, 'Refund amount cannot be negative'],
     },
+    razorpayOrderId: {
+      type: String,
+      default: '',
+    },
+    razorpayPaymentId: {
+      type: String,
+      default: '',
+    },
+    razorpaySignature: {
+      type: String,
+      default: '',
+    },
+    paidAt: {
+      type: Date,
+    },
+    refundedAt: {
+      type: Date,
+    },
+    refundId: {
+      type: String,
+      default: '',
+    },
   },
   {
     timestamps: { createdAt: true, updatedAt: false },

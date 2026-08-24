@@ -15,7 +15,7 @@ export const createOrder = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Registration not found' });
     }
 
-    if (registration.user.toString() !== req.user.id) {
+    if (registration.client.toString() !== req.user.id) {
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
 
@@ -25,7 +25,7 @@ export const createOrder = async (req, res) => {
 
     const existingPayment = await Payment.findOne({
       registration: registrationId,
-      status: 'completed',
+      paymentStatus: 'successful',
     });
     if (existingPayment) {
       return res.status(400).json({ success: false, message: 'Payment already completed' });
@@ -34,12 +34,11 @@ export const createOrder = async (req, res) => {
     const amountInPaise = Math.round(registration.totalAmount * 100);
 
     const payment = await Payment.create({
-      user: req.user.id,
+      client: req.user.id,
       registration: registrationId,
+      event: registration.event._id,
       amount: registration.totalAmount,
-      currency: 'INR',
-      status: 'pending',
-      paymentMethod: 'razorpay',
+      paymentStatus: 'pending',
     });
 
     let razorpayOrder = null;
@@ -111,7 +110,7 @@ export const verifyPayment = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Payment record not found' });
     }
 
-    payment.status = 'completed';
+    payment.paymentStatus = 'successful';
     payment.razorpayPaymentId = razorpayPaymentId;
     payment.razorpaySignature = razorpaySignature;
     payment.paidAt = new Date();
@@ -119,9 +118,7 @@ export const verifyPayment = async (req, res) => {
 
     const registration = await Registration.findById(payment.registration);
     if (registration) {
-      registration.status = 'confirmed';
-      registration.paymentStatus = 'completed';
-      registration.paymentDate = new Date();
+      registration.status = 'active';
       await registration.save();
     }
 
@@ -147,7 +144,7 @@ export const refundPayment = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Payment not found' });
     }
 
-    if (payment.status !== 'completed') {
+    if (payment.paymentStatus !== 'successful') {
       return res.status(400).json({ success: false, message: 'Can only refund completed payments' });
     }
 
@@ -191,12 +188,11 @@ export const refundPayment = async (req, res) => {
     const registration = await Registration.findById(payment.registration._id);
     if (registration) {
       registration.status = 'cancelled';
-      registration.refundEligible = true;
       await registration.save();
 
       const event = await Event.findById(registration.event._id);
       if (event) {
-        event.availableSeats += registration.numberOfSeats;
+        event.availableSeats += registration.numberOfTickets;
         await event.save();
       }
     }
@@ -220,7 +216,7 @@ export const getPaymentHistory = async (req, res) => {
     const { page = 1, limit = 10 } = req.query;
     const skip = (Number(page) - 1) * Number(limit);
 
-    const filter = { user: req.user.id };
+    const filter = { client: req.user.id };
     const total = await Payment.countDocuments(filter);
 
     const payments = await Payment.find(filter)
@@ -251,12 +247,12 @@ export const getAllPayments = async (req, res) => {
     const skip = (Number(page) - 1) * Number(limit);
 
     const filter = {};
-    if (status) filter.status = status;
+    if (status) filter.paymentStatus = status;
 
     const total = await Payment.countDocuments(filter);
 
     const payments = await Payment.find(filter)
-      .populate('user', 'name email')
+      .populate('client', 'name email')
       .populate({
         path: 'registration',
         populate: { path: 'event', select: 'title date venue' },
