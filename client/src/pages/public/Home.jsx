@@ -221,7 +221,7 @@ export default function Home() {
             {categories.map((cat, index) => (
               <Link
                 key={cat.name}
-                to={`/events?category=${cat.name}`}
+                to={`/category/${cat.name}`}
                 className="group relative rounded-2xl overflow-hidden shadow-lg card-hover"
               >
                 <img src={cat.image} alt={cat.name} className="w-full h-40 object-cover group-hover:scale-110 transition-transform duration-500" />

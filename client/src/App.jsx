@@ -9,6 +9,7 @@ import AdminLayout from './layouts/AdminLayout';
 import Home from './pages/public/Home';
 import Events from './pages/public/Events';
 import EventDetail from './pages/public/EventDetail';
+import EventCategory from './pages/public/EventCategory';
 import EmployeeDetail from './pages/public/EmployeeDetail';
 import DecorationDetail from './pages/public/DecorationDetail';
 import Decorations from './pages/public/Decorations';
@@ -82,6 +83,7 @@ function App() {
           <Route index element={<Home />} />
           <Route path="events" element={<Events />} />
           <Route path="events/:id" element={<EventDetail />} />
+          <Route path="category/:name" element={<EventCategory />} />
           <Route path="employees/:id" element={<EmployeeDetail />} />
           <Route path="decorations" element={<Decorations />} />
           <Route path="decorations/:id" element={<DecorationDetail />} />
