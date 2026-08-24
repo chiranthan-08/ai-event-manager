@@ -1,0 +1,169 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background-color: #f9fafb;
+    color: #111827;
+    min-height: 100vh;
+  }
+
+  #root {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary-600 text-white px-4 py-2 rounded-lg font-medium
+      hover:bg-primary-700 transition-colors duration-200
+      focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
+      disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary-600 text-white px-4 py-2 rounded-lg font-medium
+      hover:bg-secondary-700 transition-colors duration-200
+      focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2
+      disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-accent {
+    @apply bg-accent-500 text-white px-4 py-2 rounded-lg font-medium
+      hover:bg-accent-600 transition-colors duration-200
+      focus:outline-none focus:ring-2 focus:ring-accent-400 focus:ring-offset-2
+      disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-outline {
+    @apply border-2 border-primary-600 text-primary-600 px-4 py-2 rounded-lg font-medium
+      hover:bg-primary-50 transition-colors duration-200
+      focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
+      disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-danger {
+    @apply bg-red-600 text-white px-4 py-2 rounded-lg font-medium
+      hover:bg-red-700 transition-colors duration-200
+      focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2
+      disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .card {
+    @apply bg-white rounded-xl shadow-sm border border-gray-200 p-6;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-2 border border-gray-300 rounded-lg
+      focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent
+      placeholder-gray-400 transition-colors duration-200;
+  }
+
+  .label {
+    @apply block text-sm font-medium text-gray-700 mb-1;
+  }
+
+  .page-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8;
+  }
+
+  .page-title {
+    @apply text-3xl font-bold text-gray-900 mb-8;
+  }
+
+  .stat-card {
+    @apply bg-white rounded-xl shadow-sm border border-gray-200 p-6
+      hover:shadow-md transition-shadow duration-200;
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 3px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: #94a3b8;
+  }
+
+  .scrollbar-thick {
+    scrollbar-width: auto;
+    scrollbar-color: #6366f1 transparent;
+  }
+
+  .scrollbar-thick::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  .scrollbar-thick::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thick::-webkit-scrollbar-thumb {
+    background-color: #6366f1;
+    border-radius: 5px;
+  }
+
+  .scrollbar-thick::-webkit-scrollbar-thumb:hover {
+    background-color: #4f46e5;
+  }
+}
+
+/* Global scrollbar styles */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* Selection color */
+::selection {
+  background-color: #c7d2fe;
+  color: #312e81;
+}
+
+/* Focus visible for accessibility */
+*:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
