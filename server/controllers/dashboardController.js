@@ -1,62 +1,59 @@
-import db from '../utils/memoryDb.js';
+import Event from '../models/Event.js';
+import User from '../models/User.js';
+import Employee from '../models/Employee.js';
+import Registration from '../models/Registration.js';
+import Payment from '../models/Payment.js';
 
 export const getAdminDashboard = async (req, res) => {
   try {
-    const stats = db.getStats();
+    const totalEvents = await Event.countDocuments();
+    const totalClients = await User.countDocuments({ role: 'client' });
+    const totalEmployees = await Employee.countDocuments();
+    const totalRegistrations = await Registration.countDocuments();
 
-    const now = new Date();
-    const upcomingEvents = db.findEvents({})
-      .filter((e) => new Date(e.date) >= now)
-      .sort((a, b) => new Date(a.date) - new Date(b.date))
-      .slice(0, 5)
-      .map((e) => {
-        const creator = e.createdBy ? db.findUserById(e.createdBy) : null;
-        return { ...e, createdBy: creator };
-      });
+    const revenueResult = await Payment.aggregate([
+      { $match: { paymentStatus: 'successful' } },
+      { $group: { _id: null, total: { $sum: '$amount' } } },
+    ]);
+    const totalRevenue = revenueResult.length > 0 ? revenueResult[0].total : 0;
 
-    const recentPayments = db.findPayment({})
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-      .slice(0, 10)
-      .map((p) => {
-        const user = p.user ? db.findUserById(p.user) : null;
-        return { ...p, user };
-      });
+    const upcomingEvents = await Event.find({ date: { $gte: new Date() } })
+      .sort({ date: 1 })
+      .limit(5)
+      .populate('createdBy', 'name email');
 
-    const cancellationRequests = db.findRegistrations({ status: 'cancelled' })
-      .sort((a, b) => new Date(b.cancelledAt || 0) - new Date(a.cancelledAt || 0))
-      .slice(0, 10)
-      .map((r) => {
-        const user = r.user ? db.findUserById(r.user) : null;
-        const event = r.event ? db.findEventById(r.event) : null;
-        return { ...r, user, event };
-      });
+    const recentPayments = await Payment.find()
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .populate('client', 'name email');
 
-    const allRegistrations = db.findRegistrations({});
-    const registrationsByStatus = {};
-    allRegistrations.forEach((r) => {
-      registrationsByStatus[r.status] = (registrationsByStatus[r.status] || 0) + 1;
-    });
+    const cancellationRequests = await Registration.find({ status: 'cancelled' })
+      .sort({ updatedAt: -1 })
+      .limit(10)
+      .populate('client', 'name email')
+      .populate('event', 'title date');
 
-    const allEvents = db.findEvents({});
-    const eventsByCategory = {};
-    allEvents.forEach((e) => {
-      const cat = e.category || 'uncategorized';
-      eventsByCategory[cat] = (eventsByCategory[cat] || 0) + 1;
-    });
+    const registrationsByStatus = await Registration.aggregate([
+      { $group: { _id: '$status', count: { $sum: 1 } } },
+    ]);
+
+    const eventsByCategory = await Event.aggregate([
+      { $group: { _id: '$category', count: { $sum: 1 } } },
+    ]);
 
     res.status(200).json({
       success: true,
       dashboard: {
-        totalEvents: stats.totalEvents,
-        totalClients: stats.totalClients,
-        totalEmployees: stats.totalEmployees,
-        totalRegistrations: stats.totalRegistrations,
-        totalRevenue: stats.totalRevenue,
+        totalEvents,
+        totalClients,
+        totalEmployees,
+        totalRegistrations,
+        totalRevenue,
         upcomingEvents,
         recentPayments,
         cancellationRequests,
-        registrationsByStatus,
-        eventsByCategory: Object.entries(eventsByCategory).map(([cat, count]) => ({ _id: cat, count })),
+        registrationsByStatus: registrationsByStatus.reduce((acc, r) => { acc[r._id] = r.count; return acc; }, {}),
+        eventsByCategory,
       },
     });
   } catch (error) {
@@ -66,33 +63,30 @@ export const getAdminDashboard = async (req, res) => {
 
 export const getEmployeeDashboard = async (req, res) => {
   try {
-    const employee = db.findEmployeeByUser(req.user.id);
+    const employee = await Employee.findOne({ user: req.user.id });
     if (!employee) {
       return res.status(404).json({ success: false, message: 'Employee profile not found' });
     }
 
-    const assignedEvents = (employee.assignedEvents || [])
-      .map((eid) => db.findEventById(eid))
-      .filter(Boolean)
-      .sort((a, b) => new Date(a.date) - new Date(b.date))
-      .map((event) => {
-        const creator = event.createdBy ? db.findUserById(event.createdBy) : null;
-        const registrations = db.findRegistrations({ event: event._id || event.id });
-        const activeRegistrations = registrations.filter(
-          (r) => r.status === 'confirmed' || r.status === 'pending'
-        );
-        const totalAttendees = activeRegistrations.reduce((sum, r) => sum + (r.numberOfSeats || 0), 0);
+    const assignedEvents = await Event.find({ _id: { $in: employee.assignedEvents } })
+      .sort({ date: 1 })
+      .populate('createdBy', 'name email');
+
+    const enrichedEvents = await Promise.all(
+      assignedEvents.map(async (event) => {
+        const registrations = await Registration.find({ event: event._id, status: { $in: ['active', 'pending'] } });
+        const totalAttendees = registrations.reduce((sum, r) => sum + (r.numberOfTickets || 0), 0);
         return {
-          ...event,
-          createdBy: creator,
+          ...event.toObject(),
           registeredAttendees: totalAttendees,
           occupancyRate: event.capacity > 0 ? Math.round((totalAttendees / event.capacity) * 100) : 0,
         };
-      });
+      })
+    );
 
     const now = new Date();
-    const upcomingEvents = assignedEvents.filter((e) => new Date(e.date) >= now);
-    const pastEvents = assignedEvents.filter((e) => new Date(e.date) < now);
+    const upcomingEvents = enrichedEvents.filter((e) => new Date(e.date) >= now);
+    const pastEvents = enrichedEvents.filter((e) => new Date(e.date) < now);
 
     res.status(200).json({
       success: true,
@@ -100,7 +94,7 @@ export const getEmployeeDashboard = async (req, res) => {
         totalAssigned: assignedEvents.length,
         upcomingEvents,
         pastEvents,
-        totalRegisteredAttendees: assignedEvents.reduce((sum, e) => sum + e.registeredAttendees, 0),
+        totalRegisteredAttendees: enrichedEvents.reduce((sum, e) => sum + e.registeredAttendees, 0),
       },
     });
   } catch (error) {
@@ -110,40 +104,34 @@ export const getEmployeeDashboard = async (req, res) => {
 
 export const getClientDashboard = async (req, res) => {
   try {
-    const registrations = db.findRegistrations({ user: req.user.id })
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-      .map((reg) => {
-        const event = reg.event ? db.findEventById(reg.event) : null;
-        return { ...reg, event };
-      });
+    const registrations = await Registration.find({ client: req.user.id })
+      .sort({ createdAt: -1 })
+      .populate('event');
 
     const now = new Date();
     const upcomingRegistrations = registrations.filter(
-      (r) => r.event && new Date(r.event.date) >= now && r.status === 'confirmed'
+      (r) => r.event && new Date(r.event.date) >= now && r.status === 'active'
     );
     const pastRegistrations = registrations.filter(
       (r) => r.event && new Date(r.event.date) < now
     );
 
-    const payments = db.findPayment({ user: req.user.id })
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-      .map((p) => {
-        const reg = p.registration ? db.findRegistrationById(p.registration) : null;
-        const event = reg && reg.event ? db.findEventById(reg.event) : null;
-        return { ...p, registration: reg ? { ...reg, event } : null };
-      });
+    const payments = await Payment.find({ client: req.user.id })
+      .sort({ createdAt: -1 })
+      .populate('registration')
+      .populate('event');
 
-    const totalSpent = db.findPayment({ user: req.user.id, status: 'completed' })
-      .reduce((sum, p) => sum + (p.amount || 0), 0);
+    const completedPayments = await Payment.find({ client: req.user.id, paymentStatus: 'successful' });
+    const totalSpent = completedPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
 
     const tickets = registrations
-      .filter((r) => r.status === 'confirmed' || r.status === 'pending')
+      .filter((r) => r.status === 'active' || r.status === 'pending')
       .map((r) => ({
         ticketId: r.ticketId,
         event: r.event?.title,
         date: r.event?.date,
         venue: r.event?.venue,
-        seats: r.numberOfSeats,
+        seats: r.numberOfTickets,
         status: r.status,
       }));
 

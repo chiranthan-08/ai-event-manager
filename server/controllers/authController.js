@@ -1,9 +1,9 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import db from '../utils/memoryDb.js';
+import User from '../models/User.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'ai-event-manager-secret-key-2026';
-const JWT_EXPIRES = '7d';
+const JWT_EXPIRES = process.env.JWT_EXPIRES || '7d';
 
 const generateToken = (user) => {
   return jwt.sign(
@@ -25,31 +25,18 @@ export const register = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Password must be at least 6 characters' });
     }
 
-    const existingUser = db.findUserByEmail(email);
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ success: false, message: 'User already exists with this email' });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 12);
-    const user = db.createUser({
-      name,
-      email,
-      password: hashedPassword,
-      role: 'client',
-      profileImage: '',
-    });
-
+    const user = await User.create({ name, email, password, role: 'client', profileImage: '' });
     const token = generateToken(user);
 
     res.status(201).json({
       success: true,
       token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      },
+      user: { id: user._id, name: user.name, email: user.email, role: user.role },
     });
   } catch (error) {
     console.error('Register error:', error);
@@ -65,7 +52,7 @@ export const login = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Please provide email and password' });
     }
 
-    const user = db.findUserByEmail(email);
+    const user = await User.findOne({ email }).select('+password');
     if (!user) {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
@@ -80,12 +67,7 @@ export const login = async (req, res) => {
     res.status(200).json({
       success: true,
       token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      },
+      user: { id: user._id, name: user.name, email: user.email, role: user.role },
     });
   } catch (error) {
     console.error('Login error:', error);
@@ -95,21 +77,14 @@ export const login = async (req, res) => {
 
 export const getProfile = async (req, res) => {
   try {
-    const user = db.findUserById(req.user.id);
+    const user = await User.findById(req.user.id);
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
     res.status(200).json({
       success: true,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        profileImage: user.profileImage,
-        createdAt: user.createdAt,
-      },
+      user: { id: user._id, name: user.name, email: user.email, role: user.role, profileImage: user.profileImage, createdAt: user.createdAt },
     });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error' });

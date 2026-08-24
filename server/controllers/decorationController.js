@@ -1,26 +1,25 @@
-import db from '../utils/memoryDb.js';
+import Decoration from '../models/Decoration.js';
 
 export const getDecorations = async (req, res) => {
   try {
     const { category, page = 1, limit = 10 } = req.query;
+    const filter = {};
+    if (category) filter.category = category;
 
-    const allDecorations = db.findDecorations(category);
-    const total = allDecorations.length;
-    const skip = (Number(page) - 1) * Number(limit);
-    const paginated = allDecorations.slice(skip, skip + Number(limit));
-
-    const enriched = paginated.map((dec) => {
-      const addedBy = dec.addedBy ? db.findUserById(dec.addedBy) : null;
-      return { ...dec, addedBy };
-    });
+    const total = await Decoration.countDocuments(filter);
+    const decorations = await Decoration.find(filter)
+      .sort({ createdAt: -1 })
+      .skip((Number(page) - 1) * Number(limit))
+      .limit(Number(limit))
+      .populate('event', 'title date venue');
 
     res.status(200).json({
       success: true,
-      count: enriched.length,
+      count: decorations.length,
       total,
       totalPages: Math.ceil(total / Number(limit)),
       currentPage: Number(page),
-      decorations: enriched,
+      decorations,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error', error: error.message });
@@ -29,20 +28,17 @@ export const getDecorations = async (req, res) => {
 
 export const createDecoration = async (req, res) => {
   try {
-    const { title, description, category, imageUrl, price, tags } = req.body;
+    const { title, description, category, image, event } = req.body;
 
-    const decoration = db.createDecoration({
+    const decoration = await Decoration.create({
       title,
       description,
       category,
-      imageUrl,
-      price,
-      tags,
-      addedBy: req.user.id,
+      image,
+      event,
     });
 
-    const addedBy = db.findUserById(req.user.id);
-    res.status(201).json({ success: true, decoration: { ...decoration, addedBy } });
+    res.status(201).json({ success: true, decoration });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }
@@ -50,14 +46,12 @@ export const createDecoration = async (req, res) => {
 
 export const deleteDecoration = async (req, res) => {
   try {
-    const deleted = db.deleteDecoration(req.params.id);
-
-    if (!deleted) {
+    const decoration = await Decoration.findByIdAndDelete(req.params.id);
+    if (!decoration) {
       return res.status(404).json({ success: false, message: 'Decoration not found' });
     }
-
     res.status(200).json({ success: true, message: 'Decoration deleted successfully' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };
