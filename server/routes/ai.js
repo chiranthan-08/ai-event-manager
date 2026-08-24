@@ -3,11 +3,10 @@ import {
   getEventSuggestions,
   visualizeEvent
 } from '../controllers/aiController.js';
-import { protect } from '../middleware/auth.js';
 
 const router = express.Router();
 
-router.post('/event-suggestions', protect, getEventSuggestions);
-router.post('/visualize-event', protect, visualizeEvent);
+router.post('/event-suggestions', getEventSuggestions);
+router.post('/visualize-event', visualizeEvent);
 
 export default router;

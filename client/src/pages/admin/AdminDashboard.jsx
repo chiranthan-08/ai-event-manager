@@ -158,7 +158,7 @@ export default function AdminDashboard() {
             {data?.upcomingEvents?.length > 0 ? (
               data.upcomingEvents.map((event) => (
                 <div key={event._id} className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
-                  <img src={event.image} alt={event.title} className="w-12 h-12 rounded-lg object-cover" />
+                  <img src={event.images?.[0] || 'https://images.unsplash.com/photo-1519741497674-611481863552?w=100&h=100&fit=crop'} alt={event.title} className="w-12 h-12 rounded-lg object-cover" />
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-gray-900 truncate">{event.title}</p>
                     <p className="text-sm text-gray-500">{new Date(event.date).toLocaleDateString()}</p>

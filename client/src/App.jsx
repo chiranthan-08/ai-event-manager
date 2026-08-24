@@ -115,12 +115,13 @@ function App() {
       </Route>
 
       <Route element={<ProtectedRoute allowedRoles={['client', 'employee', 'admin']} />}>
-        <Route path="/ai-assistant" element={<PublicLayout />}>
-          <Route index element={<AIAssistant />} />
-        </Route>
         <Route path="/ai-visualize" element={<PublicLayout />}>
           <Route index element={<AIVisualize />} />
         </Route>
+      </Route>
+
+      <Route path="/ai-assistant" element={<PublicLayout />}>
+        <Route index element={<AIAssistant />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
