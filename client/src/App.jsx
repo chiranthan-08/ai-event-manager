@@ -108,6 +108,7 @@ function App() {
           <Route path="dashboard" element={<ClientDashboard />} />
           <Route path="tickets" element={<ClientTickets />} />
           <Route path="bookings" element={<ClientBookings />} />
+          <Route path="ai-assistant" element={<AIAssistant standalone={false} />} />
         </Route>
       </Route>
 
@@ -115,6 +116,7 @@ function App() {
         <Route path="/employee" element={<EmployeeLayout />}>
           <Route path="dashboard" element={<EmployeeDashboard />} />
           <Route path="events" element={<EmployeeEvents />} />
+          <Route path="ai-assistant" element={<AIAssistant standalone={false} />} />
         </Route>
       </Route>
 
@@ -126,6 +128,7 @@ function App() {
           <Route path="clients" element={<AdminClients />} />
           <Route path="payments" element={<AdminPayments />} />
           <Route path="decorations" element={<AdminDecorations />} />
+          <Route path="ai-assistant" element={<AIAssistant standalone={false} />} />
         </Route>
       </Route>
 

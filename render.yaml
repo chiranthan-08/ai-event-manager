@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: ai-event-manager-api
+    runtime: node
+    plan: free
+    buildCommand: cd server && npm install
+    startCommand: cd server && node --dns-result-order=ipv4first server.js
+    envVars:
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: false
+      - key: JWT_EXPIRES
+        value: 7d
+      - key: CORS_ORIGIN
+        sync: false
+      - key: NODE_ENV
+        value: production
