@@ -442,26 +442,34 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {galleryDecorations.map((img, index) => (
-              <Link
-                key={img._id || index}
-                to={`/decorations/${img._id || index}`}
-                className="relative rounded-2xl overflow-hidden group cursor-pointer card-hover"
-              >
-                <img src={img.url} alt={img.title} className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div className="absolute top-3 left-3">
-                    <span className={`bg-gradient-to-r ${categoryColors[img.category] || 'from-gray-500 to-gray-600'} text-white text-xs font-bold px-3 py-1 rounded-full`}>
-                      {img.category}
-                    </span>
+            {galleryDecorations.map((img, index) => {
+              const eventId = typeof img.event === 'object' ? img.event?._id : img.event;
+              const linkTo = eventId
+                ? `/decorations?event=${eventId}`
+                : img.category
+                  ? `/decorations?category=${img.category}`
+                  : '/decorations';
+              return (
+                <Link
+                  key={img._id || index}
+                  to={linkTo}
+                  className="relative rounded-2xl overflow-hidden group cursor-pointer card-hover"
+                >
+                  <img src={img.url} alt={img.title} className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="absolute top-3 left-3">
+                      <span className={`bg-gradient-to-r ${categoryColors[img.category] || 'from-gray-500 to-gray-600'} text-white text-xs font-bold px-3 py-1 rounded-full`}>
+                        {img.category}
+                      </span>
+                    </div>
+                    <div className="absolute bottom-4 left-4 text-white">
+                      <div className="font-bold text-lg">{img.title}</div>
+                      <div className="text-sm opacity-80">View all event decorations →</div>
+                    </div>
                   </div>
-                  <div className="absolute bottom-4 left-4 text-white">
-                    <div className="font-bold text-lg">{img.title}</div>
-                    <div className="text-sm opacity-80">View Details →</div>
-                  </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              );
+            })}
           </div>
 
           <div className="text-center mt-8">
