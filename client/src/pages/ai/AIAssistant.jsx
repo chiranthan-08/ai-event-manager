@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Sparkles, Send, Loader2, Lightbulb, Palette, DollarSign, MapPin, Star, Phone, Calendar, Mic, MicOff, Volume2, VolumeX, Globe } from 'lucide-react';
 import Navbar from '../../components/common/Navbar';
 import Footer from '../../components/common/Footer';
+import api from '../../services/api';
 
 const LANGUAGES = [
   { code: 'en-US', label: 'English', short: 'EN' },
@@ -11,85 +12,11 @@ const LANGUAGES = [
   { code: 'ml-IN', label: 'Malayalam', short: 'ML' },
 ];
 
-function getAIResponse(userInput) {
-  const input = userInput.toLowerCase().trim();
-
-  if (/^(hi|hello|hey|good\s*(morning|afternoon|evening)|namaste|namaskar)/i.test(input)) {
-    return pick([
-      "Hello! Welcome to AI Event Manager. I can help you plan weddings, birthdays, corporate events, and festivals. What are you celebrating?",
-      "Namaste! I'm your AI Event Assistant. I can help you plan the perfect event. What are you celebrating today?",
-      "Hey there! Tell me what you have in mind - whether it's a wedding, birthday party, corporate event, or festival celebration!"
-    ]);
-  }
-
-  if (input.length <= 3) {
-    return pick([
-      "Hello! How can I help you plan your event? Ask about venues, decorations, themes, or pricing!",
-      "Hi there! Tell me about the event you're planning - wedding, birthday, corporate, or festival?",
-      "Hey! I can help with venues, decorations, themes, pricing, and more. What do you need?"
-    ]);
-  }
-
-  if (/thank|thanks|thx|appreciate/i.test(input)) {
-    return pick([
-      "You're most welcome! I'm glad I could help. Feel free to ask anytime!",
-      "Happy to help! I'm here 24/7 for all your event planning needs.",
-      "My pleasure! Let me know if you'd like to dive deeper into any aspect!"
-    ]);
-  }
-
-  if (/contact|phone|call|book|appointment|visit|address/i.test(input)) {
-    return "You can reach us through:\n\nPhone: +91 98765 43210\nEmail: events@aievent.com\nOffice: 123 Event Plaza, MG Road, Bangalore\n\nWorking Hours:\n  Mon-Sat: 10 AM - 8 PM\n  Sun: 11 AM - 6 PM\n\nWhatsApp: +91 98765 43210\n  Send us your event details for instant quotes!";
-  }
-
-  if (/festival|diwali|holi|ganesh|onam|navratri|krishna|ugadi|pongal/i.test(input)) {
-    return "Festival Celebration Services:\n\nDiwali - Rs 50,000+\n  Rangoli, diyas, lighting, cultural performances\n\nHoli - Rs 40,000+\n  Organic colors, DJ, water games, food stalls\n\nGanesh Chaturthi - Rs 60,000+\n  Idol setup, aarti, decoration, procession\n\nNavratri/Garba - Rs 75,000+\n  Stage, dhol, lighting, cultural troupe\n\nWe Provide: Decoration, Sound, Cultural performances, Food stalls\n\nWhich festival are you celebrating?";
-  }
-
-  if (/wedding|shaadi|marriage|vivah|bride|groom|baraat/i.test(input)) {
-    return "Wedding Planning Packages:\n\nIntimate Wedding (50-100 guests) - Rs 3,00,000+\n  Garden mandap, floral decor, basic lighting\n\nClassic Wedding (200-500 guests) - Rs 8,00,000+\n  Grand mandap, premium flowers, LED wall, DJ\n\nRoyal Wedding (500-2000 guests) - Rs 25,00,000+\n  Palace venue, chandeliers, live band, celebrity performances\n\nDestination Wedding (100-500 guests) - Rs 15,00,000+\n  Goa, Udaipur, Jaipur, Kerala venues + full planning\n\nWhat's Included:\n  Venue booking, Mandap setup, Floral arrangements\n  Lighting, Photography, Catering, Guest management\n\nTell me your guest count and budget!";
-  }
-
-  if (/birthday|bday|cake/i.test(input)) {
-    return "Birthday Party Packages:\n\nKids Party (20-50 guests) - Rs 25,000+\n  Balloon decor, theme setup, game coordinator\n\nTeen Party (30-80 guests) - Rs 50,000+\n  Neon theme, DJ, photo booth, LED dance floor\n\nMilestone Birthday (50-200 guests) - Rs 1,50,000+\n  Premium decor, live band, custom cake\n\nLuxury Bash (100-500 guests) - Rs 5,00,000+\n  Celebrity appearance, grand venue, full entertainment\n\nPopular Themes: Superhero, Rainbow, Carnival, Music Night, Floral Garden\n\nWhat age group and how many guests?";
-  }
-
-  if (/corporate|company|office|annual|conference|seminar|workshop|team/i.test(input)) {
-    return "Corporate Event Solutions:\n\nAnnual Day Celebration - Rs 2,00,000+\n  Stage setup, LED screens, anchor, performances\n\nProduct Launch - Rs 3,00,000+\n  Grand reveal setup, media coverage, branding\n\nConference/Seminar - Rs 1,50,000+\n  Auditorium setup, AV equipment, live streaming\n\nTeam Building Event - Rs 1,00,000+\n  Outdoor venues, activities, games, BBQ\n\nAward Night - Rs 5,00,000+\n  Red carpet, trophy, entertainment, gala dinner\n\nWhat type of corporate event are you planning?";
-  }
-
-  if (/venue|place|location|banquet|hall|resort|hotel|farmhouse|palace/i.test(input)) {
-    return "Here are our top venue categories:\n\nBanquet Halls - 100-1000 guests\n  Grand Palace, Jaipur - Rs 2,50,000/day\n  Leela Palace, Bangalore - Rs 5,00,000/day\n\nOutdoor Venues - Gardens & Farmhouses\n  The Fern Resort, Goa - Rs 3,00,000/day\n  Farmhouse, Bangalore - Rs 1,50,000/day\n\nHeritage Properties\n  Umaid Bhawan, Jodhpur - Rs 15,00,000/day\n  Rambagh Palace, Jaipur - Rs 12,00,000/day\n\nBeach Venues\n  Grand Hyatt, Goa - Rs 8,00,000/day\n\nWould you like details about any specific venue type?";
-  }
-
-  if (/decor|decoration|stage|flower|light|mandap|rangoli|diya/i.test(input)) {
-    return "Here are our decoration packages:\n\nPremium Floral - Rs 50,000 to 2,00,000\n  Fresh flowers, centerpieces, arch decorations\n\nRoyal Chandelier - Rs 1,00,000 to 3,00,000\n  Crystal chandeliers, golden drapes, luxury lighting\n\nTraditional Indian - Rs 30,000 to 1,50,000\n  Rangoli, diyas, marigold garlands, mandap decor\n\nGarden Theme - Rs 40,000 to 1,80,000\n  Floral canopy, fairy lights, green backdrop\n\nLuxury LED - Rs 80,000 to 2,50,000\n  LED walls, laser lights, fog machine, dance floor\n\nWhich style appeals to you?";
-  }
-
-  if (/theme|style|concept|idea|vibe|aesthetic/i.test(input)) {
-    return "Popular event themes:\n\nRoyal Rajasthani - Gold, Maroon, Deep Red\n  Palace decor, elephant motifs, mirror work\n\nGarden Paradise - Green, White, Pastels\n  Floral canopy, fairy lights, wooden accents\n\nGlamorous Night - Black, Gold, Silver\n  Chandeliers, sequins, LED accents\n\nBoho Chic - Earth tones, terracotta, sage\n  Macrame, pampas grass, rattan\n\nMughal Heritage - Royal Blue, Gold, Cream\n  Arches, jali work, mirror mosaic\n\nWhich theme resonates with your vision?";
-  }
-
-  if (/price|cost|budget|how\s*much|rate|tariff/i.test(input)) {
-    return "Our event packages start from:\n\nBudget Friendly - Rs 50,000 to 1,50,000\n  Basic decor, standard setup, 50-100 guests\n\nPremium Range - Rs 2,00,000 to 5,00,000\n  Premium decor, professional lighting, 200-500 guests\n\nLuxury Range - Rs 5,00,000 to 15,00,000\n  Complete makeover, celebrity arrangements, 500-2000 guests\n\nRoyal Range - Rs 15,00,000+\n  Palatial setups, international artists, 2000+ guests\n\nTell me your event type and guest count for a detailed breakdown!";
-  }
-
-  return pick([
-    "I can help you with event planning! Try asking about:\n\n  Venues - Best places for your event\n  Decorations - Theme ideas and costs\n  Pricing - Budget-friendly packages\n  Weddings, Birthdays, Corporate events\n  Festival celebrations\n\nWhat would you like to know?",
-    "I'm your AI Event Assistant! I can help with:\n\n  Event planning (weddings, birthdays, corporate)\n  Venue suggestions and pricing\n  Decoration ideas and themes\n  Budget planning\n\nJust tell me: What event are you planning?",
-    "Let me help you plan your event! Tell me:\n\n1. What type of event?\n2. How many guests?\n3. What's your budget?\n\nWith these details, I can create a perfect plan!"
-  ]);
-}
-
-function pick(arr) {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
-
 const AIAssistant = ({ standalone = true }) => {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: "Namaste! Welcome to AI Event Manager. I'm your personal event planning assistant.\n\nI can help you with:\n\nWeddings - From intimate to royal celebrations\nBirthdays - Kids to milestone parties\nCorporate - Annual days, launches, conferences\nFestivals - Diwali, Holi, and more\nVenues - Best places for your event\nDecorations - Theme ideas and pricing\nBudget Planning - Smart cost estimates\n\nJust tell me what you're planning!"
+      content: "Namaste! Welcome to AI Event Manager. I'm your personal AI event planning assistant powered by Grok.\n\nI can help you with:\n\nWeddings - From intimate to royal celebrations\nBirthdays - Kids to milestone parties\nCorporate - Annual days, launches, conferences\nFestivals - Diwali, Holi, and more\nVenues - Best places for your event\nDecorations - Theme ideas and pricing\nBudget Planning - Smart cost estimates\n\nJust tell me what you're planning!"
     }
   ]);
   const [input, setInput] = useState('');
@@ -158,14 +85,15 @@ const AIAssistant = ({ standalone = true }) => {
     }
   };
 
-  const handleSend = (e) => {
+  const handleSend = async (e) => {
     e.preventDefault();
     const trimmed = input.trim();
     if (!trimmed || loading) return;
 
     const userMsg = { role: 'user', content: trimmed };
+    const updatedMessages = [...messages, userMsg];
     setInput('');
-    setMessages(prev => [...prev, userMsg]);
+    setMessages(updatedMessages);
     setLoading(true);
 
     if (recognitionRef.current && isListening) {
@@ -173,16 +101,27 @@ const AIAssistant = ({ standalone = true }) => {
       setIsListening(false);
     }
 
-    setTimeout(() => {
-      try {
-        const reply = getAIResponse(trimmed);
-        setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
-        setTimeout(() => speak(reply), 150);
-      } catch (err) {
-        setMessages(prev => [...prev, { role: 'assistant', content: "Sorry, something went wrong. Please try again." }]);
-      }
+    try {
+      const apiMessages = updatedMessages
+        .filter(m => m.role === 'user' || m.role === 'assistant')
+        .slice(-20)
+        .map(m => ({ role: m.role, content: m.content }));
+
+      const response = await api.post('/ai/chat', { messages: apiMessages });
+      const reply = response.data?.reply || "Sorry, I couldn't process that. Please try again.";
+
+      const assistantMsg = { role: 'assistant', content: reply };
+      setMessages(prev => [...prev, assistantMsg]);
+      setTimeout(() => speak(reply), 150);
+    } catch (err) {
+      console.error('AI chat error:', err);
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: "Sorry, I'm having trouble connecting to the AI service. Please try again in a moment."
+      }]);
+    } finally {
       setLoading(false);
-    }, 700);
+    }
   };
 
   const suggestions = [
@@ -203,7 +142,7 @@ const AIAssistant = ({ standalone = true }) => {
             <Sparkles className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900" style={{ fontFamily: "'Playfair Display', serif" }}>AI Event Assistant</h1>
-          <p className="text-gray-600 mt-2">Ask me anything about event planning</p>
+          <p className="text-gray-600 mt-2">Powered by Grok AI - Ask me anything about event planning</p>
           <p className="text-gray-400 mt-1 text-sm">Type or use the microphone to speak</p>
         </div>
 
@@ -232,7 +171,7 @@ const AIAssistant = ({ standalone = true }) => {
           <div className="flex items-center justify-between px-4 py-2 border-b border-gray-100 bg-gray-50 rounded-t-3xl">
             <div className="flex items-center gap-2">
               <div className={`w-2 h-2 rounded-full ${isListening ? 'bg-red-500 animate-pulse' : 'bg-green-500'}`} />
-              <span className="text-xs text-gray-500">{isListening ? 'Listening...' : 'Online'}</span>
+              <span className="text-xs text-gray-500">{isListening ? 'Listening...' : 'Grok AI Online'}</span>
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -289,7 +228,7 @@ const AIAssistant = ({ standalone = true }) => {
                   </div>
                   <div className="bg-gray-100 rounded-2xl px-5 py-3 flex items-center gap-2">
                     <Loader2 className="w-5 h-5 animate-spin text-saffron-500" />
-                    <span className="text-gray-500 text-sm">Thinking...</span>
+                    <span className="text-gray-500 text-sm">Grok is thinking...</span>
                   </div>
                 </div>
               </div>
@@ -328,7 +267,7 @@ const AIAssistant = ({ standalone = true }) => {
                 <Send size={18} />
               </button>
             </div>
-            <p className="text-xs text-gray-400 mt-2 text-center">Powered by AI Event Manager</p>
+            <p className="text-xs text-gray-400 mt-2 text-center">Powered by Grok AI · AI Event Manager</p>
           </form>
         </div>
       </div>

@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, MapPin, Users, Sparkles, Heart, Star, ChevronRight, ArrowRight, Gem, Music } from 'lucide-react';
+import { getEvents } from '../../services/eventService';
+import { getDecorations } from '../../services/decorationService';
 
-const featuredEvents = [
+const fallbackEvents = [
   {
-    id: '1',
+    _id: '1',
     title: 'Royal Wedding Celebration',
     category: 'Wedding',
     date: '2026-09-15',
@@ -12,11 +14,11 @@ const featuredEvents = [
     venue: 'Grand Palace Banquet Hall',
     location: 'Bangalore',
     ticketPrice: 2500,
-    availableSeats: 500,
-    image: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=600&h=400&fit=crop',
+    capacity: 500,
+    images: ['https://images.unsplash.com/photo-1519741497674-611481863552?w=600&h=400&fit=crop'],
   },
   {
-    id: '2',
+    _id: '2',
     title: 'Diwali Festival of Lights',
     category: 'Festival',
     date: '2026-10-20',
@@ -24,11 +26,11 @@ const featuredEvents = [
     venue: 'City Auditorium',
     location: 'Pune',
     ticketPrice: 500,
-    availableSeats: 800,
-    image: 'https://images.unsplash.com/photo-1551818255-e6e10975bc17?w=600&h=400&fit=crop',
+    capacity: 800,
+    images: ['https://images.unsplash.com/photo-1551818255-e6e10975bc17?w=600&h=400&fit=crop'],
   },
   {
-    id: '3',
+    _id: '3',
     title: 'Tech Summit 2026',
     category: 'Corporate',
     date: '2026-10-05',
@@ -36,11 +38,11 @@ const featuredEvents = [
     venue: 'Innovation Center',
     location: 'Hyderabad',
     ticketPrice: 5000,
-    availableSeats: 1000,
-    image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&h=400&fit=crop',
+    capacity: 1000,
+    images: ['https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&h=400&fit=crop'],
   },
   {
-    id: '4',
+    _id: '4',
     title: 'New Year Eve Party',
     category: 'Party',
     date: '2026-12-31',
@@ -48,8 +50,8 @@ const featuredEvents = [
     venue: 'Skyline Rooftop',
     location: 'Mumbai',
     ticketPrice: 4000,
-    availableSeats: 300,
-    image: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=600&h=400&fit=crop',
+    capacity: 300,
+    images: ['https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=600&h=400&fit=crop'],
   },
 ];
 
@@ -69,16 +71,64 @@ const testimonials = [
 ];
 
 const galleryImages = [
-  { url: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=400&h=300&fit=crop', title: 'Wedding Decor' },
-  { url: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=400&h=300&fit=crop', title: 'Anniversary Setup' },
-  { url: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=400&h=300&fit=crop', title: 'Party Night' },
-  { url: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=300&fit=crop', title: 'Corporate Event' },
-  { url: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=400&h=300&fit=crop', title: 'Birthday Bash' },
-  { url: 'https://images.unsplash.com/photo-1551818255-e6e10975bc17?w=400&h=300&fit=crop', title: 'Festival Celebration' },
+  { url: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=400&h=300&fit=crop', title: 'Wedding Decor', category: 'Wedding' },
+  { url: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=400&h=300&fit=crop', title: 'Anniversary Setup', category: 'Anniversary' },
+  { url: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=400&h=300&fit=crop', title: 'Party Night', category: 'Party' },
+  { url: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=300&fit=crop', title: 'Corporate Event', category: 'Corporate' },
+  { url: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=400&h=300&fit=crop', title: 'Birthday Bash', category: 'Birthday' },
+  { url: 'https://images.unsplash.com/photo-1551818255-e6e10975bc17?w=400&h=300&fit=crop', title: 'Festival Celebration', category: 'Festival' },
 ];
+
+const categoryColors = {
+  Wedding: 'from-pink-500 to-rose-600',
+  Birthday: 'from-purple-500 to-indigo-600',
+  Corporate: 'from-blue-500 to-cyan-600',
+  College: 'from-green-500 to-emerald-600',
+  Festival: 'from-saffron-500 to-amber-600',
+  Anniversary: 'from-rose-500 to-pink-600',
+  Party: 'from-red-500 to-orange-600',
+  Other: 'from-gray-500 to-gray-600',
+};
 
 export default function Home() {
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
+  const [featuredEvents, setFeaturedEvents] = useState(fallbackEvents);
+  const [galleryDecorations, setGalleryDecorations] = useState(galleryImages);
+
+  useEffect(() => {
+    const fetchFeatured = async () => {
+      try {
+        const res = await getEvents({ limit: 4, status: 'upcoming' });
+        const events = res.data?.events || res.data;
+        if (Array.isArray(events) && events.length > 0) {
+          setFeaturedEvents(events.slice(0, 4));
+        }
+      } catch {
+        // use fallback events
+      }
+    };
+
+    const fetchGallery = async () => {
+      try {
+        const res = await getDecorations({ limit: 6 });
+        const decs = res.data?.decorations || res.data;
+        if (Array.isArray(decs) && decs.length > 0) {
+          setGalleryDecorations(decs.map(d => ({
+            _id: d._id,
+            url: d.image || 'https://images.unsplash.com/photo-1519741497674-611481863552?w=400&h=300&fit=crop',
+            title: d.title,
+            category: d.category,
+            event: d.event,
+          })));
+        }
+      } catch {
+        // use fallback gallery
+      }
+    };
+
+    fetchFeatured();
+    fetchGallery();
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -248,15 +298,15 @@ export default function Home() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {featuredEvents.map((event, index) => (
+            {featuredEvents.map((event) => (
               <Link
-                key={event.id}
-                to={`/events/${event.id}`}
+                key={event._id}
+                to={`/events/${event._id}`}
                 className="bg-white rounded-2xl overflow-hidden shadow-lg card-hover group"
               >
                 <div className="relative h-48 overflow-hidden">
                   <img
-                    src={event.image}
+                    src={event.images?.[0] || 'https://images.unsplash.com/photo-1519741497674-611481863552?w=600&h=400&fit=crop'}
                     alt={event.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
@@ -285,7 +335,7 @@ export default function Home() {
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-500">
                     <Users className="w-4 h-4 text-indian-gold" />
-                    {event.availableSeats} seats available
+                    {event.capacity} seats available
                   </div>
                 </div>
               </Link>
@@ -392,16 +442,25 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {galleryImages.map((img, index) => (
-              <div key={index} className="relative rounded-2xl overflow-hidden group cursor-pointer card-hover">
+            {galleryDecorations.map((img, index) => (
+              <Link
+                key={img._id || index}
+                to={`/decorations/${img._id || index}`}
+                className="relative rounded-2xl overflow-hidden group cursor-pointer card-hover"
+              >
                 <img src={img.url} alt={img.title} className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="absolute top-3 left-3">
+                    <span className={`bg-gradient-to-r ${categoryColors[img.category] || 'from-gray-500 to-gray-600'} text-white text-xs font-bold px-3 py-1 rounded-full`}>
+                      {img.category}
+                    </span>
+                  </div>
                   <div className="absolute bottom-4 left-4 text-white">
                     <div className="font-bold text-lg">{img.title}</div>
                     <div className="text-sm opacity-80">View Details →</div>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
 

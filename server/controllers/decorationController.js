@@ -2,16 +2,17 @@ import Decoration from '../models/Decoration.js';
 
 export const getDecorations = async (req, res) => {
   try {
-    const { category, page = 1, limit = 10 } = req.query;
+    const { category, event, page = 1, limit = 10 } = req.query;
     const filter = {};
     if (category) filter.category = category;
+    if (event) filter.event = event;
 
     const total = await Decoration.countDocuments(filter);
     const decorations = await Decoration.find(filter)
       .sort({ createdAt: -1 })
       .skip((Number(page) - 1) * Number(limit))
       .limit(Number(limit))
-      .populate('event', 'title date venue');
+      .populate('event', 'title date venue location category');
 
     res.status(200).json({
       success: true,

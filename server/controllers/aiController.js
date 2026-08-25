@@ -145,6 +145,146 @@ export const getEventSuggestions = async (req, res) => {
   }
 };
 
+export const chatWithAI = async (req, res) => {
+  try {
+    const { messages } = req.body;
+
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+      return res.status(400).json({ success: false, message: 'Messages array is required' });
+    }
+
+    const apiKey = process.env.XAI_API_KEY;
+
+    const systemMessage = {
+      role: 'system',
+      content: `You are an AI Event Planning Assistant for "AI Event Manager", an Indian event management company. You help users plan weddings, birthdays, corporate events, festivals, and more.
+
+Key details about the company:
+- We offer full-service event planning across India
+- Packages range from budget (Rs 50,000) to royal (Rs 15,00,000+)
+- We cover all major Indian cities: Bangalore, Mumbai, Delhi, Hyderabad, Pune, Goa, Jaipur, Udaipur, Chennai
+- Services include: venue booking, decorations, catering, photography, entertainment, guest management
+- Popular themes: Royal Rajasthani, Garden Paradise, Glamorous Night, Boho Chic, Mughal Heritage
+
+Always respond in a helpful, friendly manner. Use Indian Rupees (Rs/₹) for pricing. Suggest specific venues, themes, and packages when relevant. Keep responses concise but informative. Format with line breaks for readability.`
+    };
+
+    const apiMessages = [systemMessage, ...messages.map(m => ({
+      role: m.role,
+      content: m.content
+    }))];
+
+    if (apiKey && apiKey.startsWith('xai-')) {
+      try {
+        const response = await fetch('https://api.x.ai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            model: 'grok-3-mini-latest',
+            messages: apiMessages,
+            max_tokens: 1024,
+            temperature: 0.7,
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const reply = data.choices?.[0]?.message?.content;
+          if (reply) {
+            return res.status(200).json({ success: true, reply });
+          }
+        }
+        console.error('xAI API error:', response.status, await response.text());
+      } catch (apiError) {
+        console.error('xAI API call failed:', apiError.message);
+      }
+    }
+
+    const lastUserMsg = messages.filter(m => m.role === 'user').pop()?.content?.toLowerCase() || '';
+    const reply = generateLocalResponse(lastUserMsg);
+    res.status(200).json({ success: true, reply });
+
+  } catch (error) {
+    console.error('Chat AI error:', error.message);
+    res.status(500).json({ success: false, message: 'AI service error' });
+  }
+};
+
+function generateLocalResponse(input) {
+  if (/^(hi|hello|hey|good\s*(morning|afternoon|evening)|namaste|namaskar)/i.test(input)) {
+    return pick([
+      "Hello! Welcome to AI Event Manager. I can help you plan weddings, birthdays, corporate events, and festivals. What are you celebrating?",
+      "Namaste! I'm your AI Event Assistant powered by Grok. What event are you planning today?",
+      "Hey there! Tell me what you have in mind - whether it's a wedding, birthday party, corporate event, or festival celebration!"
+    ]);
+  }
+
+  if (input.length <= 3) {
+    return pick([
+      "Hello! How can I help you plan your event? Ask about venues, decorations, themes, or pricing!",
+      "Hi there! Tell me about the event you're planning - wedding, birthday, corporate, or festival?",
+      "Hey! I can help with venues, decorations, themes, pricing, and more. What do you need?"
+    ]);
+  }
+
+  if (/thank|thanks|thx|appreciate/i.test(input)) {
+    return pick([
+      "You're most welcome! I'm glad I could help. Feel free to ask anytime!",
+      "Happy to help! I'm here 24/7 for all your event planning needs.",
+      "My pleasure! Let me know if you'd like to dive deeper into any aspect!"
+    ]);
+  }
+
+  if (/contact|phone|call|book|appointment|visit|address/i.test(input)) {
+    return "You can reach us through:\n\nPhone: +91 98765 43210\nEmail: events@aievent.com\nOffice: 123 Event Plaza, MG Road, Bangalore\n\nWorking Hours:\n  Mon-Sat: 10 AM - 8 PM\n  Sun: 11 AM - 6 PM\n\nWhatsApp: +91 98765 43210\n  Send us your event details for instant quotes!";
+  }
+
+  if (/festival|diwali|holi|ganesh|onam|navratri|krishna|ugadi|pongal/i.test(input)) {
+    return "Festival Celebration Services:\n\nDiwali - Rs 50,000+\n  Rangoli, diyas, lighting, cultural performances\n\nHoli - Rs 40,000+\n  Organic colors, DJ, water games, food stalls\n\nGanesh Chaturthi - Rs 60,000+\n  Idol setup, aarti, decoration, procession\n\nNavratri/Garba - Rs 75,000+\n  Stage, dhol, lighting, cultural troupe\n\nWe Provide: Decoration, Sound, Cultural performances, Food stalls\n\nWhich festival are you celebrating?";
+  }
+
+  if (/wedding|shaadi|marriage|vivah|bride|groom|baraat/i.test(input)) {
+    return "Wedding Planning Packages:\n\nIntimate Wedding (50-100 guests) - Rs 3,00,000+\n  Garden mandap, floral decor, basic lighting\n\nClassic Wedding (200-500 guests) - Rs 8,00,000+\n  Grand mandap, premium flowers, LED wall, DJ\n\nRoyal Wedding (500-2000 guests) - Rs 25,00,000+\n  Palace venue, chandeliers, live band, celebrity performances\n\nDestination Wedding (100-500 guests) - Rs 15,00,000+\n  Goa, Udaipur, Jaipur, Kerala venues + full planning\n\nWhat's Included:\n  Venue booking, Mandap setup, Floral arrangements\n  Lighting, Photography, Catering, Guest management\n\nTell me your guest count and budget!";
+  }
+
+  if (/birthday|bday|cake/i.test(input)) {
+    return "Birthday Party Packages:\n\nKids Party (20-50 guests) - Rs 25,000+\n  Balloon decor, theme setup, game coordinator\n\nTeen Party (30-80 guests) - Rs 50,000+\n  Neon theme, DJ, photo booth, LED dance floor\n\nMilestone Birthday (50-200 guests) - Rs 1,50,000+\n  Premium decor, live band, custom cake\n\nLuxury Bash (100-500 guests) - Rs 5,00,000+\n  Celebrity appearance, grand venue, full entertainment\n\nPopular Themes: Superhero, Rainbow, Carnival, Music Night, Floral Garden\n\nWhat age group and how many guests?";
+  }
+
+  if (/corporate|company|office|annual|conference|seminar|workshop|team/i.test(input)) {
+    return "Corporate Event Solutions:\n\nAnnual Day Celebration - Rs 2,00,000+\n  Stage setup, LED screens, anchor, performances\n\nProduct Launch - Rs 3,00,000+\n  Grand reveal setup, media coverage, branding\n\nConference/Seminar - Rs 1,50,000+\n  Auditorium setup, AV equipment, live streaming\n\nTeam Building Event - Rs 1,00,000+\n  Outdoor venues, activities, games, BBQ\n\nAward Night - Rs 5,00,000+\n  Red carpet, trophy, entertainment, gala dinner\n\nWhat type of corporate event are you planning?";
+  }
+
+  if (/venue|place|location|banquet|hall|resort|hotel|farmhouse|palace/i.test(input)) {
+    return "Here are our top venue categories:\n\nBanquet Halls - 100-1000 guests\n  Grand Palace, Jaipur - Rs 2,50,000/day\n  Leela Palace, Bangalore - Rs 5,00,000/day\n\nOutdoor Venues - Gardens & Farmhouses\n  The Fern Resort, Goa - Rs 3,00,000/day\n  Farmhouse, Bangalore - Rs 1,50,000/day\n\nHeritage Properties\n  Umaid Bhawan, Jodhpur - Rs 15,00,000/day\n  Rambagh Palace, Jaipur - Rs 12,00,000/day\n\nBeach Venues\n  Grand Hyatt, Goa - Rs 8,00,000/day\n\nWould you like details about any specific venue type?";
+  }
+
+  if (/decor|decoration|stage|flower|light|mandap|rangoli|diya/i.test(input)) {
+    return "Here are our decoration packages:\n\nPremium Floral - Rs 50,000 to 2,00,000\n  Fresh flowers, centerpieces, arch decorations\n\nRoyal Chandelier - Rs 1,00,000 to 3,00,000\n  Crystal chandeliers, golden drapes, luxury lighting\n\nTraditional Indian - Rs 30,000 to 1,50,000\n  Rangoli, diyas, marigold garlands, mandap decor\n\nGarden Theme - Rs 40,000 to 1,80,000\n  Floral canopy, fairy lights, green backdrop\n\nLuxury LED - Rs 80,000 to 2,50,000\n  LED walls, laser lights, fog machine, dance floor\n\nWhich style appeals to you?";
+  }
+
+  if (/theme|style|concept|idea|vibe|aesthetic/i.test(input)) {
+    return "Popular event themes:\n\nRoyal Rajasthani - Gold, Maroon, Deep Red\n  Palace decor, elephant motifs, mirror work\n\nGarden Paradise - Green, White, Pastels\n  Floral canopy, fairy lights, wooden accents\n\nGlamorous Night - Black, Gold, Silver\n  Chandeliers, sequins, LED accents\n\nBoho Chic - Earth tones, terracotta, sage\n  Macrame, pampas grass, rattan\n\nMughal Heritage - Royal Blue, Gold, Cream\n  Arches, jali work, mirror mosaic\n\nWhich theme resonates with your vision?";
+  }
+
+  if (/price|cost|budget|how\s*much|rate|tariff/i.test(input)) {
+    return "Our event packages start from:\n\nBudget Friendly - Rs 50,000 to 1,50,000\n  Basic decor, standard setup, 50-100 guests\n\nPremium Range - Rs 2,00,000 to 5,00,000\n  Premium decor, professional lighting, 200-500 guests\n\nLuxury Range - Rs 5,00,000 to 15,00,000\n  Complete makeover, celebrity arrangements, 500-2000 guests\n\nRoyal Range - Rs 15,00,000+\n  Palatial setups, international artists, 2000+ guests\n\nTell me your event type and guest count for a detailed breakdown!";
+  }
+
+  return pick([
+    "I can help you with event planning! Try asking about:\n\n  Venues - Best places for your event\n  Decorations - Theme ideas and costs\n  Pricing - Budget-friendly packages\n  Weddings, Birthdays, Corporate events\n  Festival celebrations\n\nWhat would you like to know?",
+    "I'm your AI Event Assistant! I can help with:\n\n  Event planning (weddings, birthdays, corporate)\n  Venue suggestions and pricing\n  Decoration ideas and themes\n  Budget planning\n\nJust tell me: What event are you planning?",
+    "Let me help you plan your event! Tell me:\n\n1. What type of event?\n2. How many guests?\n3. What's your budget?\n\nWith these details, I can create a perfect plan!"
+  ]);
+}
+
+function pick(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
 export const visualizeEvent = async (req, res) => {
   try {
     const { type, guests, budget, theme, venue, date } = req.body;

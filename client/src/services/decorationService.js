@@ -1,10 +1,12 @@
 import api from './api';
 
-export const getDecorations = (category) => {
-  const params = category ? { category } : {};
+export const getDecorations = (params = {}) => {
   return api.get('/decorations', { params });
+};
+export const getDecorationsByEvent = (eventId) => {
+  return api.get('/decorations', { params: { event: eventId } });
 };
 export const createDecoration = (data) => api.post('/decorations', data);
 export const deleteDecoration = (id) => api.delete(`/decorations/${id}`);
 
-export default { getDecorations, createDecoration, deleteDecoration };
+export default { getDecorations, getDecorationsByEvent, createDecoration, deleteDecoration };
