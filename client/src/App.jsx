@@ -69,10 +69,9 @@ const PublicRoute = () => {
     return <LoadingSpinner />;
   }
 
-  if (user) {
+  if (user && (user.role === 'admin' || user.role === 'employee')) {
     if (user.role === 'admin') return <Navigate to="/admin/dashboard" replace />;
-    if (user.role === 'employee') return <Navigate to="/employee/dashboard" replace />;
-    return <Navigate to="/client/dashboard" replace />;
+    return <Navigate to="/employee/dashboard" replace />;
   }
 
   return <Outlet />;

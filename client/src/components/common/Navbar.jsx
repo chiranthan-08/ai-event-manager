@@ -54,6 +54,12 @@ export default function Navbar() {
               <Sparkles className="w-4 h-4" />
               AI Assistant
             </NavLink>
+            {isAuthenticated && user?.role === 'client' && (
+              <NavLink to="/client/dashboard">
+                <Calendar className="w-4 h-4" />
+                My Dashboard
+              </NavLink>
+            )}
           </div>
 
           {/* Auth Buttons */}
