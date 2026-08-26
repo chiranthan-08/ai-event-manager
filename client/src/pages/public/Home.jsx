@@ -131,7 +131,9 @@ export default function Home() {
         const res = await getEvents({ limit: 4, status: 'upcoming' });
         const events = res.data?.events || res.data;
         if (Array.isArray(events) && events.length > 0) {
-          setFeaturedEvents(events.slice(0, 4));
+          // Remove duplicates by event ID
+          const uniqueEvents = [...new Set(events.map(e => e._id))].map(id => events.find(e => e._id === id));
+          setFeaturedEvents(uniqueEvents.slice(0, 4));
         }
       } catch {
         // use fallback events
@@ -492,13 +494,6 @@ export default function Home() {
                       ₹{event.ticketPrice}
                     </span>
                   </div>
-                  {event.category === 'Birthday' && (
-                    <div className="absolute top-3 right-3">
-                      <span className="bg-white/90 text-gray-800 text-xs font-bold px-3 py-1 rounded-full">
-                        🎂
-                      </span>
-                    </div>
-                  )}
                 </div>
                 <div className="p-5">
                   <h3 className="font-bold text-gray-800 text-lg mb-2 group-hover:text-saffron-500 transition-colors">
