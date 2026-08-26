@@ -90,6 +90,18 @@ const categoryColors = {
   Other: 'from-gray-500 to-gray-600',
 };
 
+// Category-specific cover images for Featured Events section only
+const categoryFeaturedImages = {
+  Wedding: 'https://images.pexels.com/photos/1444442/pexels-photo-1444442.jpeg?w=600&h=400&fit=crop',
+  Birthday: 'https://images.pexels.com/photos/30870953/pexels-photo-30870953.jpeg?w=600&h=400&fit=crop',
+  Corporate: 'https://images.pexels.com/photos/2608517/pexels-photo-2608517.jpeg?w=600&h=400&fit=crop',
+  College: 'https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg?w=600&h=400&fit=crop',
+  Festival: 'https://images.pexels.com/photos/30274906/pexels-photo-30274906.jpeg?w=600&h=400&fit=crop',
+  Party: 'https://images.pexels.com/photos/3171837/pexels-photo-3171837.jpeg?w=600&h=400&fit=crop',
+  Anniversary: 'https://images.pexels.com/photos/1616113/pexels-photo-1616113.jpeg?w=600&h=400&fit=crop',
+  Other: 'https://images.pexels.com/photos/1444442/pexels-photo-1444442.jpeg?w=600&h=400&fit=crop',
+};
+
 export default function Home() {
   const navigate = useNavigate();
   const searchRef = useRef(null);
@@ -454,7 +466,7 @@ export default function Home() {
               >
                 <div className="relative h-48 overflow-hidden">
                   <img
-                    src={event.images?.[0] || (event.category === 'Birthday' ? 'https://images.pexels.com/photos/30870953/pexels-photo-30870953.jpeg?w=600&h=400&fit=crop' : 'https://images.pexels.com/photos/1444442/pexels-photo-1444442.jpeg?w=600&h=400&fit=crop')}
+                    src={event.images?.[0] || categoryFeaturedImages[event.category] || 'https://images.pexels.com/photos/1444442/pexels-photo-1444442.jpeg?w=600&h=400&fit=crop'}
                     alt={event.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
