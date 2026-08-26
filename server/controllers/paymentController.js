@@ -253,10 +253,7 @@ export const getAllPayments = async (req, res) => {
 
     const payments = await Payment.find(filter)
       .populate('client', 'name email')
-      .populate({
-        path: 'registration',
-        populate: { path: 'event', select: 'title date venue' },
-      })
+      .populate('event', 'title date venue')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(Number(limit));

@@ -3,12 +3,14 @@ import {
   createRegistration,
   getMyRegistrations,
   getEventRegistrations,
-  cancelRegistration
+  cancelRegistration,
+  getAllRegistrations,
 } from '../controllers/registrationController.js';
 import { protect, authorize } from '../middleware/auth.js';
 
 const router = express.Router();
 
+router.get('/all', protect, authorize('admin'), getAllRegistrations);
 router.post('/', protect, authorize('client'), createRegistration);
 router.get('/my-registrations', protect, authorize('client'), getMyRegistrations);
 router.get('/event/:eventId', protect, authorize(['admin', 'employee']), getEventRegistrations);

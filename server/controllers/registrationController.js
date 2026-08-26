@@ -152,3 +152,30 @@ export const getEventRegistrations = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }
 };
+
+export const getAllRegistrations = async (req, res) => {
+  try {
+    const { page = 1, limit = 10, status, search } = req.query;
+    const filter = {};
+    if (status) filter.status = status;
+
+    const total = await Registration.countDocuments(filter);
+    const registrations = await Registration.find(filter)
+      .sort({ createdAt: -1 })
+      .skip((Number(page) - 1) * Number(limit))
+      .limit(Number(limit))
+      .populate('client', 'name email')
+      .populate('event', 'title date venue category');
+
+    res.status(200).json({
+      success: true,
+      count: registrations.length,
+      total,
+      totalPages: Math.ceil(total / Number(limit)),
+      currentPage: Number(page),
+      registrations,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+};

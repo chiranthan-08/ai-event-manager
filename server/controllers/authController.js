@@ -30,8 +30,11 @@ export const register = async (req, res) => {
       return res.status(400).json({ success: false, message: 'User already exists with this email' });
     }
 
-    const validRoles = ['admin', 'employee', 'client'];
-    const userRole = validRoles.includes(role) ? role : 'client';
+    const allowedRoles = ['employee', 'client'];
+    if (role && !allowedRoles.includes(role)) {
+      return res.status(400).json({ success: false, message: 'Invalid role. Admin accounts cannot be created through registration.' });
+    }
+    const userRole = allowedRoles.includes(role) ? role : 'client';
 
     const user = await User.create({ name, email, password, role: userRole, profileImage: '' });
     const token = generateToken(user);
@@ -88,6 +91,37 @@ export const getProfile = async (req, res) => {
     res.status(200).json({
       success: true,
       user: { id: user._id, name: user.name, email: user.email, role: user.role, profileImage: user.profileImage, createdAt: user.createdAt },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+export const getAllUsers = async (req, res) => {
+  try {
+    const { page = 1, limit = 20, role, search } = req.query;
+    const filter = {};
+    if (role) filter.role = role;
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } },
+      ];
+    }
+
+    const total = await User.countDocuments(filter);
+    const users = await User.find(filter)
+      .select('-password')
+      .sort({ createdAt: -1 })
+      .skip((Number(page) - 1) * Number(limit))
+      .limit(Number(limit));
+
+    res.status(200).json({
+      success: true,
+      count: users.length,
+      total,
+      totalPages: Math.ceil(total / Number(limit)),
+      users,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error' });

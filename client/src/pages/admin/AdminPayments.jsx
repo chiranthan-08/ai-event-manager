@@ -27,10 +27,17 @@ export default function AdminPayments() {
       const params = { page, limit: 10 };
       if (statusFilter) params.status = statusFilter;
       if (search) params.search = search;
-      const response = await getAllPayments(params);
-      setPayments(response.data.payments || response.data);
+      const response = await getAllPayments({ params });
+      const paymentsData = response.data.payments || response.data;
+      setPayments(paymentsData);
       setTotalPages(response.data.totalPages || 1);
-      if (response.data.stats) setStats(response.data.stats);
+      const allPayments = Array.isArray(paymentsData) ? paymentsData : [];
+      setStats({
+        totalRevenue: allPayments.filter(p => p.paymentStatus === 'successful').reduce((sum, p) => sum + (p.amount || 0), 0),
+        completedPayments: allPayments.filter(p => p.paymentStatus === 'successful').length,
+        pendingPayments: allPayments.filter(p => p.paymentStatus === 'pending').length,
+        refundedPayments: allPayments.filter(p => p.paymentStatus === 'refunded').length,
+      });
     } catch (error) {
       toast.error('Failed to load payments');
     } finally {
@@ -174,7 +181,7 @@ export default function AdminPayments() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-900">{payment.event?.title}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900">{payment.event?.title || 'N/A'}</td>
                     <td className="px-6 py-4 text-sm text-gray-600 font-mono">{payment.paymentId}</td>
                     <td className="px-6 py-4 text-sm font-medium text-gray-900 text-right">${payment.amount}</td>
                     <td className="px-6 py-4 text-center">

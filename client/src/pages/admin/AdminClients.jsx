@@ -22,7 +22,7 @@ export default function AdminClients() {
     try {
       setLoading(true);
       const response = await getClients();
-      setClients(response.data.clients || response.data);
+      setClients(response.data.users || response.data.clients || response.data);
     } catch (error) {
       toast.error('Failed to load clients');
     } finally {

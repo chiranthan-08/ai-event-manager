@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, Eye, EyeOff, UserPlus, CheckCircle, Shield, Briefcase, Users } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff, UserPlus, CheckCircle, Briefcase, Users } from 'lucide-react';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 
 const roles = [
   { value: 'client', label: 'Client', icon: Users, description: 'Book events & services' },
   { value: 'employee', label: 'Employee', icon: Briefcase, description: 'Manage events & tasks' },
-  { value: 'admin', label: 'Admin', icon: Shield, description: 'Full system access' },
 ];
 
 export default function Register() {
@@ -75,7 +74,7 @@ export default function Register() {
               {/* Role Selection */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-3">I want to join as</label>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 gap-3">
                   {roles.map((role) => {
                     const Icon = role.icon;
                     return (

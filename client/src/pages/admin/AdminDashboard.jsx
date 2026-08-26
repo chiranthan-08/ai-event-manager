@@ -46,7 +46,7 @@ export default function AdminDashboard() {
     try {
       setLoading(true);
       const response = await getAdminDashboard();
-      setData(response.data);
+      setData(response.data.dashboard || response.data);
     } catch (error) {
       toast.error('Failed to load dashboard data');
     } finally {

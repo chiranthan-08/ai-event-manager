@@ -2,9 +2,10 @@ import express from 'express';
 import {
   register,
   login,
-  getProfile
+  getProfile,
+  getAllUsers,
 } from '../controllers/authController.js';
-import { protect } from '../middleware/auth.js';
+import { protect, authorize } from '../middleware/auth.js';
 import { registerValidation, loginValidation } from '../utils/validators.js';
 
 const router = express.Router();
@@ -12,5 +13,6 @@ const router = express.Router();
 router.post('/register', registerValidation, register);
 router.post('/login', loginValidation, login);
 router.get('/profile', protect, getProfile);
+router.get('/users', protect, authorize('admin'), getAllUsers);
 
 export default router;

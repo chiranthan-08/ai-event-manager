@@ -40,6 +40,8 @@ import AdminEmployees from './pages/admin/AdminEmployees';
 import AdminClients from './pages/admin/AdminClients';
 import AdminPayments from './pages/admin/AdminPayments';
 import AdminDecorations from './pages/admin/AdminDecorations';
+import AdminBookings from './pages/admin/AdminBookings';
+import AdminAddOns from './pages/admin/AdminAddOns';
 
 import AIAssistant from './pages/ai/AIAssistant';
 import AIVisualize from './pages/ai/AIVisualize';
@@ -127,8 +129,10 @@ function App() {
         <Route path="/admin" element={<AdminLayout />}>
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="events" element={<AdminEvents />} />
+          <Route path="bookings" element={<AdminBookings />} />
           <Route path="employees" element={<AdminEmployees />} />
           <Route path="clients" element={<AdminClients />} />
+          <Route path="add-ons" element={<AdminAddOns />} />
           <Route path="payments" element={<AdminPayments />} />
           <Route path="decorations" element={<AdminDecorations />} />
           <Route path="ai-assistant" element={<AIAssistant standalone={false} />} />

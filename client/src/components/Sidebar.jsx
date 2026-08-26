@@ -13,14 +13,18 @@ import {
   ChevronRight,
   LogOut,
   User,
+  Package,
+  Settings,
 } from 'lucide-react';
 
 const menuConfig = {
   admin: [
     { label: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
     { label: 'Events', path: '/admin/events', icon: Calendar },
+    { label: 'Bookings', path: '/admin/bookings', icon: BookOpen },
     { label: 'Employees', path: '/admin/employees', icon: Users },
     { label: 'Clients', path: '/admin/clients', icon: Users },
+    { label: 'Add-Ons', path: '/admin/add-ons', icon: Package },
     { label: 'Payments', path: '/admin/payments', icon: CreditCard },
     { label: 'Decorations', path: '/admin/decorations', icon: Palette },
     { label: 'AI Assistant', path: '/admin/ai-assistant', icon: Sparkles },
