@@ -264,6 +264,11 @@ export default function Home() {
                   <Sparkles className="w-4 h-4" />
                   AI Assistant
                 </Link>
+                <div className="flex items-center gap-2 bg-white rounded-full px-8 py-3 text-sm font-medium">
+                  <marquee behavior="scroll" direction="left" scrollamount="5">
+                    100% Refund for Valid Reasons with Proof
+                  </marquee>
+                </div>
               </div>
 
               {/* Home Search Bar */}
