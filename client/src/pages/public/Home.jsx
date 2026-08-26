@@ -53,18 +53,6 @@ const fallbackEvents = [
     capacity: 300,
     images: ['https://images.pexels.com/photos/3171837/pexels-photo-3171837.jpeg?w=600&h=400&fit=crop'],
   },
-  {
-    _id: '5',
-    title: 'Neon Night Birthday Bash',
-    category: 'Birthday',
-    date: '2026-11-15',
-    time: '8:00 PM',
-    venue: 'Club Pulse, Mumbai',
-    location: 'Mumbai',
-    ticketPrice: 1500,
-    capacity: 200,
-    images: ['https://images.pexels.com/photos/36704167/pexels-photo-36704167.jpeg?w=600&h=400&fit=crop'],
-  },
 ];
 
 const categories = [
