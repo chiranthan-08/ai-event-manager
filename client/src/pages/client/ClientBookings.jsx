@@ -21,7 +21,7 @@ export default function ClientBookings() {
     try {
       setLoading(true);
       const response = await getMyRegistrations();
-      setBookings(response.data.bookings || response.data);
+      setBookings(response.data.registrations || response.data.bookings || []);
     } catch (error) {
       toast.error('Failed to load bookings');
     } finally {
@@ -100,18 +100,24 @@ export default function ClientBookings() {
           {filteredBookings.map((booking) => (
             <div key={booking._id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
               <div className="relative h-40">
-                <img src={booking.event?.image} alt={booking.event?.title} className="w-full h-full object-cover" />
+                <img
+                  src={booking.event?.images?.[0] || booking.event?.image}
+                  alt={booking.event?.title}
+                  className="w-full h-full object-cover"
+                  onError={(e) => { e.target.src = `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="400" height="160"><rect width="400" height="160" fill="#f97316"/><text x="200" y="90" font-size="40" text-anchor="middle" fill="white">🎉</text></svg>`)}`; }}
+                />
                 <span className={`absolute top-3 right-3 px-2 py-1 text-xs font-medium rounded-full ${
-                  booking.status === 'confirmed' ? 'bg-green-100 text-green-700' :
+                  booking.status === 'active' ? 'bg-green-100 text-green-700' :
                   booking.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                  'bg-red-100 text-red-700'
+                  booking.status === 'cancelled' ? 'bg-red-100 text-red-700' :
+                  'bg-gray-100 text-gray-700'
                 }`}>
                   {booking.status}
                 </span>
               </div>
               <div className="p-4">
                 <h3 className="font-semibold text-gray-900 mb-2">{booking.event?.title}</h3>
-                <div className="space-y-1.5 text-sm text-gray-600 mb-4">
+                <div className="space-y-1.5 text-sm text-gray-600 mb-3">
                   <div className="flex items-center gap-2">
                     <Calendar size={14} />
                     <span>{new Date(booking.event?.date).toLocaleDateString()}</span>
@@ -125,6 +131,22 @@ export default function ClientBookings() {
                     <span className="font-mono text-xs">{booking.ticketId}</span>
                   </div>
                 </div>
+                <div className="flex items-center justify-between mb-3 pb-3 border-t border-gray-100 pt-3">
+                  <span className="text-sm text-gray-500">{booking.numberOfTickets} ticket{booking.numberOfTickets > 1 ? 's' : ''}</span>
+                  <span className="text-sm font-bold text-gray-900">₹{booking.totalAmount?.toLocaleString()}</span>
+                </div>
+                {booking.addOns?.length > 0 && (
+                  <div className="mb-3 pb-3 border-t border-gray-100 pt-3">
+                    <p className="text-xs text-gray-400 mb-1">Add-ons:</p>
+                    <div className="flex flex-wrap gap-1">
+                      {booking.addOns.map((a, i) => (
+                        <span key={i} className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">
+                          {a.name} × {a.quantity}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <div className="flex gap-2">
                   <button
                     onClick={() => setViewTicket(booking)}
@@ -197,16 +219,41 @@ export default function ClientBookings() {
                 </div>
                 <div>
                   <p className="text-xs opacity-70">Location</p>
-                  <p className="font-medium">{viewTicket.event?.location}</p>
+                  <p className="font-medium">{viewTicket.event?.location || viewTicket.event?.venue}</p>
                 </div>
                 <div>
-                  <p className="text-xs opacity-70">Status</p>
-                  <p className="font-medium capitalize">{viewTicket.status}</p>
+                  <p className="text-xs opacity-70">Tickets</p>
+                  <p className="font-medium">{viewTicket.numberOfTickets}</p>
                 </div>
               </div>
               <div className="mt-4 pt-4 border-t border-white/20">
                 <p className="text-xs opacity-70 mb-1">Attendee</p>
-                <p className="font-medium">{viewTicket.client?.name}</p>
+                <p className="font-medium">{viewTicket.client?.name || 'You'}</p>
+              </div>
+              {viewTicket.addOns?.length > 0 && (
+                <div className="mt-3 pt-3 border-t border-white/20">
+                  <p className="text-xs opacity-70 mb-2">Add-ons:</p>
+                  <div className="space-y-1">
+                    {viewTicket.addOns.map((a, i) => (
+                      <div key={i} className="flex justify-between text-sm">
+                        <span className="opacity-90">{a.name} × {a.quantity}</span>
+                        <span className="font-medium">₹{(a.price * a.quantity).toLocaleString()}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {viewTicket.addOnsTotal > 0 && (
+                    <div className="flex justify-between text-sm mt-2 pt-2 border-t border-white/20">
+                      <span className="opacity-70">Add-ons Total</span>
+                      <span className="font-medium">₹{viewTicket.addOnsTotal.toLocaleString()}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+              <div className="mt-3 pt-3 border-t border-white/20">
+                <div className="flex justify-between">
+                  <span className="text-sm opacity-70">Total Paid</span>
+                  <span className="text-lg font-bold">₹{viewTicket.totalAmount?.toLocaleString()}</span>
+                </div>
               </div>
             </div>
             <div className="flex justify-end mt-4">

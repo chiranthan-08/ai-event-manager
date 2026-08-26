@@ -9,6 +9,7 @@ import { getEvent } from '../../services/eventService';
 import { getEvents } from '../../services/eventService';
 import { createRegistration } from '../../services/registrationService';
 import { useAuth } from '../../context/AuthContext';
+import { useCart } from '../../context/CartContext';
 import { formatCurrency } from '../../utils/helpers';
 import toast from 'react-hot-toast';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -34,6 +35,7 @@ const EventDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { addEventToCart } = useCart();
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [booking, setBooking] = useState(false);
@@ -77,15 +79,33 @@ const EventDetail = () => {
     }
     try {
       setBooking(true);
-      await createRegistration({ eventId: event._id, tickets: ticketQuantity });
+      await createRegistration({ eventId: event._id, numberOfSeats: ticketQuantity });
       toast.success('Tickets booked successfully!');
-      fetchEvent();
+      navigate('/client/dashboard');
     } catch (error) {
       const message = error.response?.data?.message || 'Booking failed';
       toast.error(message);
     } finally {
       setBooking(false);
     }
+  };
+
+  const handleAddToCart = () => {
+    addEventToCart(event, ticketQuantity);
+    toast.success(
+      (t) => (
+        <span>
+          {event.title} added to cart!{' '}
+          <button
+            onClick={() => { toast.dismiss(t.id); navigate('/cart'); }}
+            className="font-bold text-orange-600 underline ml-1"
+          >
+            View Cart
+          </button>
+        </span>
+      ),
+      { duration: 4000 }
+    );
   };
 
   const handleShare = () => {
@@ -112,7 +132,7 @@ const EventDetail = () => {
 
   const images = event.images?.length > 0
     ? event.images
-    : ['https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&h=600&fit=crop'];
+    : ['https://images.pexels.com/photos/1444442/pexels-photo-1444442.jpeg?w=1200&h=600&fit=crop'];
 
   const eventDate = new Date(event.date);
   const isValidDate = !isNaN(eventDate.getTime());
@@ -385,6 +405,15 @@ const EventDetail = () => {
                   {booking ? 'Booking...' : isBookable ? 'Book Now' : 'Not Available'}
                 </button>
 
+                {isBookable && (
+                  <button
+                    onClick={handleAddToCart}
+                    className="w-full mt-3 py-3 rounded-xl font-bold text-orange-600 border-2 border-orange-200 hover:bg-orange-50 transition-all flex items-center justify-center gap-2"
+                  >
+                    🛒 Add to Cart
+                  </button>
+                )}
+
                 {!isBookable && (
                   <p className="text-center text-sm text-gray-500 mt-3">
                     This event is currently {event.status}
@@ -446,7 +475,7 @@ const EventDetail = () => {
                 >
                   <div className="relative h-44 overflow-hidden">
                     <img
-                      src={ev.images?.[0] || 'https://images.unsplash.com/photo-1519741497674-611481863552?w=600&h=400&fit=crop'}
+                      src={ev.images?.[0] || 'https://images.pexels.com/photos/1444442/pexels-photo-1444442.jpeg?w=600&h=400&fit=crop'}
                       alt={ev.title}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />

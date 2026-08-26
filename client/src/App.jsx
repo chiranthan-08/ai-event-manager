@@ -30,9 +30,16 @@ import Register from './pages/auth/Register';
 import ClientDashboard from './pages/client/ClientDashboard';
 import ClientTickets from './pages/client/ClientTickets';
 import ClientBookings from './pages/client/ClientBookings';
+import ClientSettings from './pages/client/ClientSettings';
 
 import EmployeeDashboard from './pages/employee/EmployeeDashboard';
 import EmployeeEvents from './pages/employee/EmployeeEvents';
+import OrganizerBookings from './pages/employee/OrganizerBookings';
+import OrganizerClients from './pages/employee/OrganizerClients';
+import OrganizerPayments from './pages/employee/OrganizerPayments';
+import OrganizerDecorations from './pages/employee/OrganizerDecorations';
+import OrganizerAddOns from './pages/employee/OrganizerAddOns';
+import OrganizerSettings from './pages/employee/OrganizerSettings';
 
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminEvents from './pages/admin/AdminEvents';
@@ -110,9 +117,11 @@ function App() {
 
       <Route element={<ProtectedRoute allowedRoles={['client']} />}>
         <Route path="/client" element={<ClientLayout />}>
+          <Route index element={<Navigate to="/client/dashboard" replace />} />
           <Route path="dashboard" element={<ClientDashboard />} />
           <Route path="tickets" element={<ClientTickets />} />
           <Route path="bookings" element={<ClientBookings />} />
+          <Route path="settings" element={<ClientSettings />} />
           <Route path="ai-assistant" element={<AIAssistant standalone={false} />} />
         </Route>
       </Route>
@@ -121,6 +130,12 @@ function App() {
         <Route path="/employee" element={<EmployeeLayout />}>
           <Route path="dashboard" element={<EmployeeDashboard />} />
           <Route path="events" element={<EmployeeEvents />} />
+          <Route path="bookings" element={<OrganizerBookings />} />
+          <Route path="clients" element={<OrganizerClients />} />
+          <Route path="payments" element={<OrganizerPayments />} />
+          <Route path="decorations" element={<OrganizerDecorations />} />
+          <Route path="add-ons" element={<OrganizerAddOns />} />
+          <Route path="settings" element={<OrganizerSettings />} />
           <Route path="ai-assistant" element={<AIAssistant standalone={false} />} />
         </Route>
       </Route>

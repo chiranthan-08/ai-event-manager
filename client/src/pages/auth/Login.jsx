@@ -122,22 +122,24 @@ export default function Login() {
 
           {/* Demo credentials */}
           <div className="mt-6 p-4 bg-gradient-to-r from-saffron-50 to-amber-50 rounded-xl">
-            <p className="text-sm font-medium text-gray-700 mb-2">Demo Credentials:</p>
-            <div className="grid grid-cols-3 gap-2 text-xs">
-              <div className="bg-white rounded-lg p-2 text-center">
-                <div className="font-bold text-saffron-500">Admin</div>
-                <div className="text-gray-500">admin@example.com</div>
+            <p className="text-sm font-medium text-gray-700 mb-3">Demo Credentials:</p>
+            <div className="space-y-2 text-xs">
+              <div className="bg-white rounded-lg px-3 py-2 flex items-center justify-between">
+                <span className="font-bold text-indian-gold">Client</span>
+                <span className="text-gray-500">client@example.com</span>
+                <span className="text-gray-400 font-mono">client123</span>
               </div>
-              <div className="bg-white rounded-lg p-2 text-center">
-                <div className="font-bold text-indian-green">Employee</div>
-                <div className="text-gray-500">priya@example.com</div>
+              <div className="bg-white rounded-lg px-3 py-2 flex items-center justify-between">
+                <span className="font-bold text-indian-green">Organizer</span>
+                <span className="text-gray-500">priya@example.com</span>
+                <span className="text-gray-400 font-mono">employee123</span>
               </div>
-              <div className="bg-white rounded-lg p-2 text-center">
-                <div className="font-bold text-indian-gold">Client</div>
-                <div className="text-gray-500">client@example.com</div>
+              <div className="bg-white rounded-lg px-3 py-2 flex items-center justify-between">
+                <span className="font-bold text-saffron-500">Admin</span>
+                <span className="text-gray-500">admin@example.com</span>
+                <span className="text-gray-400 font-mono">admin123</span>
               </div>
             </div>
-            <p className="text-xs text-gray-500 mt-2 text-center">Password: admin123 / employee123 / client123</p>
           </div>
         </div>
 

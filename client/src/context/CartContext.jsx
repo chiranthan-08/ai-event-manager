@@ -19,9 +19,51 @@ export const CartProvider = ({ children }) => {
     }
   });
 
+  const [eventItem, setEventItem] = useState(() => {
+    try {
+      const saved = localStorage.getItem('event-cart-event');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const [ticketCount, setTicketCount] = useState(() => {
+    try {
+      const saved = localStorage.getItem('event-cart-tickets');
+      return saved ? JSON.parse(saved) : 1;
+    } catch {
+      return 1;
+    }
+  });
+
   useEffect(() => {
     localStorage.setItem('event-cart', JSON.stringify(items));
   }, [items]);
+
+  useEffect(() => {
+    if (eventItem) {
+      localStorage.setItem('event-cart-event', JSON.stringify(eventItem));
+    } else {
+      localStorage.removeItem('event-cart-event');
+    }
+  }, [eventItem]);
+
+  useEffect(() => {
+    localStorage.setItem('event-cart-tickets', JSON.stringify(ticketCount));
+  }, [ticketCount]);
+
+  const addEventToCart = (event, tickets = 1) => {
+    setEventItem(event);
+    setTicketCount(tickets);
+    toast.success(`${event.title} added to cart`);
+  };
+
+  const removeEventFromCart = () => {
+    setEventItem(null);
+    setTicketCount(1);
+    toast.success('Event removed from cart');
+  };
 
   const addItem = (addOn, quantity = 1) => {
     setItems(prev => {
@@ -53,6 +95,8 @@ export const CartProvider = ({ children }) => {
 
   const clearCart = () => {
     setItems([]);
+    setEventItem(null);
+    setTicketCount(1);
     toast.success('Cart cleared');
   };
 
@@ -61,7 +105,8 @@ export const CartProvider = ({ children }) => {
   };
 
   const getItemCount = () => {
-    return items.reduce((sum, item) => sum + item.quantity, 0);
+    const addOnCount = items.reduce((sum, item) => sum + item.quantity, 0);
+    return eventItem ? addOnCount + 1 : addOnCount;
   };
 
   const getItemsByCategory = () => {
@@ -75,6 +120,11 @@ export const CartProvider = ({ children }) => {
 
   const value = {
     items,
+    eventItem,
+    ticketCount,
+    setTicketCount,
+    addEventToCart,
+    removeEventFromCart,
     addItem,
     removeItem,
     updateQuantity,

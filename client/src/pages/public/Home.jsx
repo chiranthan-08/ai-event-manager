@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Calendar, MapPin, Users, Sparkles, Heart, Star, ChevronRight, ArrowRight, Gem, Music } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Calendar, MapPin, Users, Sparkles, Heart, Star, ChevronRight, ArrowRight, Gem, Music, Search } from 'lucide-react';
 import { getEvents } from '../../services/eventService';
 import { getDecorations } from '../../services/decorationService';
 
@@ -15,7 +15,7 @@ const fallbackEvents = [
     location: 'Bangalore',
     ticketPrice: 2500,
     capacity: 500,
-    images: ['https://images.unsplash.com/photo-1519741497674-611481863552?w=600&h=400&fit=crop'],
+    images: ['https://images.pexels.com/photos/1444442/pexels-photo-1444442.jpeg?w=600&h=400&fit=crop'],
   },
   {
     _id: '2',
@@ -27,7 +27,7 @@ const fallbackEvents = [
     location: 'Pune',
     ticketPrice: 500,
     capacity: 800,
-    images: ['https://images.unsplash.com/photo-1551818255-e6e10975bc17?w=600&h=400&fit=crop'],
+    images: ['https://images.pexels.com/photos/30274906/pexels-photo-30274906.jpeg?w=600&h=400&fit=crop'],
   },
   {
     _id: '3',
@@ -39,7 +39,7 @@ const fallbackEvents = [
     location: 'Hyderabad',
     ticketPrice: 5000,
     capacity: 1000,
-    images: ['https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&h=400&fit=crop'],
+    images: ['https://images.pexels.com/photos/2608517/pexels-photo-2608517.jpeg?w=600&h=400&fit=crop'],
   },
   {
     _id: '4',
@@ -51,17 +51,17 @@ const fallbackEvents = [
     location: 'Mumbai',
     ticketPrice: 4000,
     capacity: 300,
-    images: ['https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=600&h=400&fit=crop'],
+    images: ['https://images.pexels.com/photos/3171837/pexels-photo-3171837.jpeg?w=600&h=400&fit=crop'],
   },
 ];
 
 const categories = [
-  { name: 'Wedding', icon: '💑', color: 'from-pink-500 to-rose-600', count: 12, image: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=300&h=200&fit=crop' },
-  { name: 'Birthday', icon: '🎂', color: 'from-purple-500 to-indigo-600', count: 8, image: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=300&h=200&fit=crop' },
-  { name: 'Corporate', icon: '💼', color: 'from-blue-500 to-cyan-600', count: 15, image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=300&h=200&fit=crop' },
-  { name: 'College', icon: '🎓', color: 'from-green-500 to-emerald-600', count: 6, image: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=300&h=200&fit=crop' },
-  { name: 'Festival', icon: '🪔', color: 'from-saffron-500 to-amber-600', count: 10, image: 'https://images.unsplash.com/photo-1551818255-e6e10975bc17?w=300&h=200&fit=crop' },
-  { name: 'Party', icon: '🎉', color: 'from-red-500 to-pink-600', count: 9, image: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=300&h=200&fit=crop' },
+  { name: 'Wedding', icon: '💑', color: 'from-pink-500 to-rose-600', count: 12, image: 'https://images.pexels.com/photos/1444442/pexels-photo-1444442.jpeg?w=300&h=200&fit=crop' },
+  { name: 'Birthday', icon: '🎂', color: 'from-purple-500 to-indigo-600', count: 8, image: 'https://images.pexels.com/photos/30870953/pexels-photo-30870953.jpeg?w=300&h=200&fit=crop' },
+  { name: 'Corporate', icon: '💼', color: 'from-blue-500 to-cyan-600', count: 15, image: 'https://images.pexels.com/photos/2608517/pexels-photo-2608517.jpeg?w=300&h=200&fit=crop' },
+  { name: 'College', icon: '🎓', color: 'from-green-500 to-emerald-600', count: 6, image: 'https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg?w=300&h=200&fit=crop' },
+  { name: 'Festival', icon: '🪔', color: 'from-saffron-500 to-amber-600', count: 10, image: 'https://images.pexels.com/photos/30274906/pexels-photo-30274906.jpeg?w=300&h=200&fit=crop' },
+  { name: 'Party', icon: '🎉', color: 'from-red-500 to-pink-600', count: 9, image: 'https://images.pexels.com/photos/3171837/pexels-photo-3171837.jpeg?w=300&h=200&fit=crop' },
 ];
 
 const testimonials = [
@@ -71,12 +71,12 @@ const testimonials = [
 ];
 
 const galleryImages = [
-  { url: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=400&h=300&fit=crop', title: 'Wedding Decor', category: 'Wedding' },
-  { url: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=400&h=300&fit=crop', title: 'Anniversary Setup', category: 'Anniversary' },
-  { url: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=400&h=300&fit=crop', title: 'Party Night', category: 'Party' },
-  { url: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=300&fit=crop', title: 'Corporate Event', category: 'Corporate' },
-  { url: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=400&h=300&fit=crop', title: 'Birthday Bash', category: 'Birthday' },
-  { url: 'https://images.unsplash.com/photo-1551818255-e6e10975bc17?w=400&h=300&fit=crop', title: 'Festival Celebration', category: 'Festival' },
+  { _id: '1', url: 'https://images.pexels.com/photos/1444442/pexels-photo-1444442.jpeg?w=400&h=300&fit=crop', title: 'Royal Wedding Mandap', category: 'Wedding' },
+  { _id: '2', url: 'https://images.pexels.com/photos/30870953/pexels-photo-30870953.jpeg?w=400&h=300&fit=crop', title: 'Birthday Balloon Setup', category: 'Birthday' },
+  { _id: '6', url: 'https://images.pexels.com/photos/1749057/pexels-photo-1749057.jpeg?w=400&h=300&fit=crop', title: 'DJ Night Lighting', category: 'Party' },
+  { _id: '3', url: 'https://images.pexels.com/photos/2608517/pexels-photo-2608517.jpeg?w=400&h=300&fit=crop', title: 'Corporate Gala Night', category: 'Corporate' },
+  { _id: '4', url: 'https://images.pexels.com/photos/30274906/pexels-photo-30274906.jpeg?w=400&h=300&fit=crop', title: 'Diwali Festival Decor', category: 'Festival' },
+  { _id: '7', url: 'https://images.pexels.com/photos/1616113/pexels-photo-1616113.jpeg?w=400&h=300&fit=crop', title: 'Anniversary Celebration', category: 'Anniversary' },
 ];
 
 const categoryColors = {
@@ -91,9 +91,15 @@ const categoryColors = {
 };
 
 export default function Home() {
+  const navigate = useNavigate();
+  const searchRef = useRef(null);
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [featuredEvents, setFeaturedEvents] = useState(fallbackEvents);
   const [galleryDecorations, setGalleryDecorations] = useState(galleryImages);
+  const [homeSearch, setHomeSearch] = useState('');
+  const [allEvents, setAllEvents] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
+  const [showSearchResults, setShowSearchResults] = useState(false);
 
   useEffect(() => {
     const fetchFeatured = async () => {
@@ -108,18 +114,39 @@ export default function Home() {
       }
     };
 
+    const fetchAllEvents = async () => {
+      try {
+        const res = await getEvents({ limit: 50 });
+        const events = res.data?.events || res.data;
+        if (Array.isArray(events) && events.length > 0) {
+          setAllEvents(events);
+        }
+      } catch {
+        // use empty
+      }
+    };
+
     const fetchGallery = async () => {
       try {
-        const res = await getDecorations({ limit: 6 });
+        const res = await getDecorations({ limit: 50 });
         const decs = res.data?.decorations || res.data;
         if (Array.isArray(decs) && decs.length > 0) {
-          setGalleryDecorations(decs.map(d => ({
-            _id: d._id,
-            url: d.image || 'https://images.unsplash.com/photo-1519741497674-611481863552?w=400&h=300&fit=crop',
-            title: d.title,
-            category: d.category,
-            event: d.event,
-          })));
+          const seen = new Set();
+          const diverse = [];
+          for (const d of decs) {
+            if (!seen.has(d.category) && diverse.length < 6) {
+              seen.add(d.category);
+              diverse.push({
+                _id: d._id,
+                url: d.image || 'https://images.pexels.com/photos/1444442/pexels-photo-1444442.jpeg?w=400&h=300&fit=crop',
+                title: d.title,
+                category: d.category,
+              });
+            }
+          }
+          if (diverse.length >= 3) {
+            setGalleryDecorations(diverse);
+          }
         }
       } catch {
         // use fallback gallery
@@ -128,7 +155,39 @@ export default function Home() {
 
     fetchFeatured();
     fetchGallery();
+    fetchAllEvents();
   }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        setShowSearchResults(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    if (homeSearch.trim().length > 0) {
+      const s = homeSearch.toLowerCase();
+      const matched = allEvents.filter(e =>
+        e.title?.toLowerCase().includes(s) ||
+        e.category?.toLowerCase().includes(s) ||
+        e.venue?.toLowerCase().includes(s) ||
+        e.location?.toLowerCase().includes(s) ||
+        e.description?.toLowerCase().includes(s)
+      ).slice(0, 5);
+      const categoryMatches = ['Wedding', 'Birthday', 'Corporate', 'Party', 'Festival', 'Anniversary', 'College']
+        .filter(c => c.toLowerCase().includes(s))
+        .map(c => ({ type: 'category', label: c }));
+      setSearchResults([...categoryMatches, ...matched.map(e => ({ type: 'event', event: e }))]);
+      setShowSearchResults(true);
+    } else {
+      setSearchResults([]);
+      setShowSearchResults(false);
+    }
+  }, [homeSearch, allEvents]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -141,7 +200,7 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-b from-orange-50 via-white to-green-50">
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden min-h-[90vh] flex items-center">
+      <section className="relative overflow-hidden min-h-[85vh] flex items-center">
         {/* Background Pattern */}
         <div className="absolute inset-0 mandala-bg opacity-50"></div>
 
@@ -149,17 +208,17 @@ export default function Home() {
         <div className="absolute top-32 right-8 text-4xl diya-float opacity-40">🪔</div>
         <div className="absolute bottom-32 right-16 text-3xl diya-float opacity-30" style={{ animationDelay: '1s' }}>🪔</div>
 
-        <div className="container mx-auto px-4 py-20 relative z-10">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="container mx-auto px-4 py-12 relative z-10">
+          <div className="grid lg:grid-cols-2 gap-8 items-center">
             <div className="animate-fade-in">
               {/* Indian decorative element */}
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-saffron-500 text-2xl">✦</span>
-                <span className="text-indian-gold text-sm font-medium tracking-widest uppercase">AI-Powered Event Management</span>
-                <span className="text-saffron-500 text-2xl">✦</span>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-saffron-500 text-xl">✦</span>
+                <span className="text-indian-gold text-xs font-medium tracking-widest uppercase">AI-Powered Event Management</span>
+                <span className="text-saffron-500 text-xl">✦</span>
               </div>
 
-              <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight">
                 <span className="bg-gradient-to-r from-saffron-500 via-indian-red to-saffron-600 bg-clip-text text-transparent">
                   Celebrate
                 </span>
@@ -171,39 +230,128 @@ export default function Home() {
                 </span>
               </h1>
 
-              <p className="text-lg text-gray-600 mb-8 leading-relaxed max-w-lg">
+              <p className="text-base text-gray-600 mb-6 leading-relaxed max-w-lg">
                 From grand weddings to intimate celebrations, we bring your dream events to life with
                 <span className="text-saffron-500 font-semibold"> AI-powered suggestions</span>,
                 stunning decorations, and seamless planning.
               </p>
 
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-wrap gap-3">
                 <Link
                   to="/events"
-                  className="btn-indian text-white px-8 py-4 rounded-xl font-semibold text-lg flex items-center gap-2 shadow-lg"
+                  className="btn-indian text-white px-6 py-3 rounded-xl font-semibold text-base flex items-center gap-2 shadow-lg"
                 >
-                  <Calendar className="w-5 h-5" />
+                  <Calendar className="w-4 h-4" />
                   Explore Events
                 </Link>
                 <Link
                   to="/ai-assistant"
-                  className="bg-white text-saffron-500 border-2 border-saffron-500 px-8 py-4 rounded-xl font-semibold text-lg flex items-center gap-2 hover:bg-saffron-50 transition-all"
+                  className="bg-white text-saffron-500 border-2 border-saffron-500 px-6 py-3 rounded-xl font-semibold text-base flex items-center gap-2 hover:bg-saffron-50 transition-all"
                 >
-                  <Sparkles className="w-5 h-5" />
+                  <Sparkles className="w-4 h-4" />
                   AI Assistant
                 </Link>
               </div>
 
+              {/* Home Search Bar */}
+              <div className="mt-6 max-w-lg relative" ref={searchRef}>
+                <div className="flex items-center gap-2 bg-white rounded-xl shadow-lg p-2">
+                  <Search className="w-5 h-5 text-gray-400 ml-2" />
+                  <input
+                    type="text"
+                    placeholder='Search events, categories, add-ons...'
+                    value={homeSearch}
+                    onChange={(e) => setHomeSearch(e.target.value)}
+                    onFocus={() => homeSearch.trim() && searchResults.length > 0 && setShowSearchResults(true)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && homeSearch.trim()) {
+                        setShowSearchResults(false);
+                        navigate(`/events?search=${encodeURIComponent(homeSearch.trim())}`);
+                      }
+                    }}
+                    className="flex-1 py-2 px-2 text-gray-800 placeholder-gray-400 focus:outline-none"
+                  />
+                  <button
+                    onClick={() => {
+                      setShowSearchResults(false);
+                      if (homeSearch.trim()) {
+                        navigate(`/events?search=${encodeURIComponent(homeSearch.trim())}`);
+                      }
+                    }}
+                    className="bg-gradient-to-r from-saffron-500 to-amber-500 text-white px-5 py-2 rounded-lg font-semibold hover:shadow-md transition-all"
+                  >
+                    Search
+                  </button>
+                </div>
+
+                {showSearchResults && searchResults.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border border-gray-100 py-2 z-50 max-h-80 overflow-y-auto">
+                    {searchResults.map((item, i) => (
+                      item.type === 'category' ? (
+                        <button
+                          key={`cat-${i}`}
+                          onClick={() => {
+                            setShowSearchResults(false);
+                            navigate(`/events?search=${item.label}`);
+                          }}
+                          className="w-full px-4 py-3 text-left hover:bg-saffron-50 flex items-center gap-3 transition-colors"
+                        >
+                          <span className="w-8 h-8 bg-gradient-to-br from-saffron-500 to-amber-500 rounded-lg flex items-center justify-center text-white text-sm">
+                            <Sparkles className="w-4 h-4" />
+                          </span>
+                          <div>
+                            <span className="font-medium text-gray-800">{item.label}</span>
+                            <span className="text-sm text-gray-400 ml-2">Category</span>
+                          </div>
+                        </button>
+                      ) : (
+                        <button
+                          key={item.event._id}
+                          onClick={() => {
+                            setShowSearchResults(false);
+                            navigate(`/events/${item.event._id}`);
+                          }}
+                          className="w-full px-4 py-3 text-left hover:bg-saffron-50 flex items-center gap-3 transition-colors"
+                        >
+                          <img
+                            src={item.event.images?.[0] || item.event.image}
+                            alt=""
+                            className="w-10 h-10 rounded-lg object-cover"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-gray-800 truncate">{item.event.title}</div>
+                            <div className="text-sm text-gray-400 flex items-center gap-2">
+                              <span className="px-1.5 py-0.5 bg-saffron-100 text-saffron-600 rounded text-xs">{item.event.category}</span>
+                              {item.event.venue && <span className="truncate">{item.event.venue}</span>}
+                            </div>
+                          </div>
+                          <span className="text-sm font-semibold text-saffron-500">₹{item.event.ticketPrice?.toLocaleString()}</span>
+                        </button>
+                      )
+                    ))}
+                    <button
+                      onClick={() => {
+                        setShowSearchResults(false);
+                        navigate(`/events?search=${encodeURIComponent(homeSearch.trim())}`);
+                      }}
+                      className="w-full px-4 py-3 text-center text-saffron-500 font-medium hover:bg-saffron-50 border-t border-gray-100 mt-1"
+                    >
+                      View all results for "{homeSearch}" →
+                    </button>
+                  </div>
+                )}
+              </div>
+
               {/* Stats */}
-              <div className="flex gap-8 mt-12">
+              <div className="flex gap-6 mt-8">
                 {[
                   { number: '500+', label: 'Events' },
                   { number: '10K+', label: 'Happy Clients' },
                   { number: '50+', label: 'Venues' },
                 ].map((stat, i) => (
                   <div key={i} className="text-center">
-                    <div className="text-3xl font-bold text-saffron-500">{stat.number}</div>
-                    <div className="text-sm text-gray-500">{stat.label}</div>
+                    <div className="text-2xl font-bold text-saffron-500">{stat.number}</div>
+                    <div className="text-xs text-gray-500">{stat.label}</div>
                   </div>
                 ))}
               </div>
@@ -211,34 +359,34 @@ export default function Home() {
 
             {/* Hero Image Grid */}
             <div className="relative animate-slide-up">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-3">
                   <div className="rounded-2xl overflow-hidden shadow-2xl card-hover">
-                    <img src="https://images.unsplash.com/photo-1519741497674-611481863552?w=400&h=300&fit=crop" alt="Wedding" className="w-full h-48 object-cover" />
+                    <img src="https://images.pexels.com/photos/1444442/pexels-photo-1444442.jpeg?w=400&h=300&fit=crop" alt="Wedding" className="w-full h-40 object-cover" />
                   </div>
                   <div className="rounded-2xl overflow-hidden shadow-2xl card-hover">
-                    <img src="https://images.unsplash.com/photo-1551818255-e6e10975bc17?w=400&h=200&fit=crop" alt="Festival" className="w-full h-32 object-cover" />
+                    <img src="https://images.pexels.com/photos/30274906/pexels-photo-30274906.jpeg?w=400&h=200&fit=crop" alt="Festival" className="w-full h-28 object-cover" />
                   </div>
                 </div>
-                <div className="space-y-4 mt-8">
+                <div className="space-y-3 mt-6">
                   <div className="rounded-2xl overflow-hidden shadow-2xl card-hover">
-                    <img src="https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=400&h=200&fit=crop" alt="Party" className="w-full h-32 object-cover" />
+                    <img src="https://images.pexels.com/photos/3171837/pexels-photo-3171837.jpeg?w=400&h=200&fit=crop" alt="Party" className="w-full h-28 object-cover" />
                   </div>
                   <div className="rounded-2xl overflow-hidden shadow-2xl card-hover">
-                    <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=300&fit=crop" alt="Corporate" className="w-full h-48 object-cover" />
+                    <img src="https://images.pexels.com/photos/2608517/pexels-photo-2608517.jpeg?w=400&h=300&fit=crop" alt="Corporate" className="w-full h-40 object-cover" />
                   </div>
                 </div>
               </div>
 
               {/* Floating Card */}
-              <Link to="/ai-assistant" className="absolute -bottom-6 -left-6 bg-white rounded-2xl shadow-xl p-4 animate-float hover:shadow-2xl transition-shadow cursor-pointer">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gradient-to-br from-saffron-500 to-amber-500 rounded-full flex items-center justify-center">
-                    <Sparkles className="w-6 h-6 text-white" />
+              <Link to="/ai-assistant" className="absolute -bottom-4 -left-4 bg-white rounded-xl shadow-xl p-3 animate-float hover:shadow-2xl transition-shadow cursor-pointer">
+                <div className="flex items-center gap-2">
+                  <div className="w-9 h-9 bg-gradient-to-br from-saffron-500 to-amber-500 rounded-full flex items-center justify-center">
+                    <Sparkles className="w-4 h-4 text-white" />
                   </div>
                   <div>
-                    <div className="font-bold text-gray-800">AI Powered</div>
-                    <div className="text-sm text-gray-500">Smart Suggestions</div>
+                    <div className="font-bold text-gray-800 text-sm">AI Powered</div>
+                    <div className="text-xs text-gray-500">Smart Suggestions</div>
                   </div>
                 </div>
               </Link>
@@ -306,7 +454,7 @@ export default function Home() {
               >
                 <div className="relative h-48 overflow-hidden">
                   <img
-                    src={event.images?.[0] || 'https://images.unsplash.com/photo-1519741497674-611481863552?w=600&h=400&fit=crop'}
+                    src={event.images?.[0] || 'https://images.pexels.com/photos/1444442/pexels-photo-1444442.jpeg?w=600&h=400&fit=crop'}
                     alt={event.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
@@ -443,9 +591,8 @@ export default function Home() {
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {galleryDecorations.map((img, index) => {
-              const eventId = typeof img.event === 'object' ? img.event?._id : img.event;
-              const linkTo = eventId
-                ? `/decorations?event=${eventId}`
+              const linkTo = img._id
+                ? `/decorations/${img._id}`
                 : img.category
                   ? `/decorations?category=${img.category}`
                   : '/decorations';

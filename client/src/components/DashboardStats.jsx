@@ -41,7 +41,7 @@ function getColorKey(color) {
   return 'blue';
 }
 
-export default function DashboardStats({ icon: Icon, label, value, change, color = 'blue' }) {
+export default function DashboardStats({ icon: Icon, label, value, change, color = 'blue', prefix = '' }) {
   const [displayValue, setDisplayValue] = useState(0);
   const colors = colorClasses[getColorKey(color)] || colorClasses.blue;
 
@@ -84,7 +84,7 @@ export default function DashboardStats({ icon: Icon, label, value, change, color
         )}
       </div>
       <div className="mt-4">
-        <p className="text-3xl font-bold text-gray-900 tabular-nums">{displayValue.toLocaleString()}</p>
+        <p className="text-3xl font-bold text-gray-900 tabular-nums">{prefix}{displayValue.toLocaleString()}</p>
         <p className="text-sm text-gray-500 mt-1">{label}</p>
       </div>
     </div>

@@ -7,7 +7,7 @@ const JWT_EXPIRES = process.env.JWT_EXPIRES || '7d';
 
 const generateToken = (user) => {
   return jwt.sign(
-    { id: user._id.toString(), role: user.role, name: user.name, email: user.email },
+    { id: user._id.toString(), role: user.role, name: user.name, email: user.email, organizerId: user.organizerId || null },
     JWT_SECRET,
     { expiresIn: JWT_EXPIRES }
   );
@@ -42,7 +42,7 @@ export const register = async (req, res) => {
     res.status(201).json({
       success: true,
       token,
-      user: { id: user._id, name: user.name, email: user.email, role: user.role },
+      user: { id: user._id, name: user.name, email: user.email, role: user.role, organizerId: user.organizerId },
     });
   } catch (error) {
     console.error('Register error:', error);
@@ -73,7 +73,7 @@ export const login = async (req, res) => {
     res.status(200).json({
       success: true,
       token,
-      user: { id: user._id, name: user.name, email: user.email, role: user.role },
+      user: { id: user._id, name: user.name, email: user.email, role: user.role, organizerId: user.organizerId },
     });
   } catch (error) {
     console.error('Login error:', error);
@@ -90,8 +90,73 @@ export const getProfile = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      user: { id: user._id, name: user.name, email: user.email, role: user.role, profileImage: user.profileImage, createdAt: user.createdAt },
+      user: { id: user._id, name: user.name, email: user.email, role: user.role, profileImage: user.profileImage, organizerId: user.organizerId, createdAt: user.createdAt },
     });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+export const updateProfile = async (req, res) => {
+  try {
+    const { name, email, phone, profileImage } = req.body;
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    if (name) user.name = name;
+    if (email && email !== user.email) {
+      const existing = await User.findOne({ email, _id: { $ne: user._id } });
+      if (existing) {
+        return res.status(400).json({ success: false, message: 'Email already in use' });
+      }
+      user.email = email;
+    }
+    if (req.body.phone !== undefined) user.phone = req.body.phone;
+    if (profileImage !== undefined) user.profileImage = profileImage;
+
+    await user.save();
+
+    const token = generateToken(user);
+
+    res.status(200).json({
+      success: true,
+      message: 'Profile updated successfully',
+      token,
+      user: { id: user._id, name: user.name, email: user.email, role: user.role, profileImage: user.profileImage, organizerId: user.organizerId },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+export const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ success: false, message: 'Please provide current and new password' });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ success: false, message: 'New password must be at least 6 characters' });
+    }
+
+    const user = await User.findById(req.user.id).select('+password');
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ success: false, message: 'Current password is incorrect' });
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    res.status(200).json({ success: true, message: 'Password changed successfully' });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error' });
   }
@@ -103,9 +168,10 @@ export const getAllUsers = async (req, res) => {
     const filter = {};
     if (role) filter.role = role;
     if (search) {
+      const safe = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       filter.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { email: { $regex: search, $options: 'i' } },
+        { name: { $regex: safe, $options: 'i' } },
+        { email: { $regex: safe, $options: 'i' } },
       ];
     }
 

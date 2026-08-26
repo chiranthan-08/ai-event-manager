@@ -36,9 +36,19 @@ const userSchema = new mongoose.Schema(
       default: 'client',
       required: true,
     },
+    organizerId: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
     profileImage: {
       type: String,
       default: '',
+    },
+    phone: {
+      type: String,
+      default: '',
+      trim: true,
     },
     isActive: {
       type: Boolean,
@@ -58,6 +68,10 @@ const userSchema = new mongoose.Schema(
 );
 
 userSchema.pre('save', async function (next) {
+  if (this.isNew && this.role === 'employee' && !this.organizerId) {
+    const count = await mongoose.model('User').countDocuments({ role: 'employee' });
+    this.organizerId = `ORG-${String(count + 1).padStart(3, '0')}`;
+  }
   if (!this.isModified('password')) return next();
 
   try {

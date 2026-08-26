@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Sparkles, Eye, Calendar, MapPin, ArrowLeft, Filter } from 'lucide-react';
 import { getDecorations } from '../../services/decorationService';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -20,13 +20,18 @@ const categoryColors = {
   Other: 'from-gray-500 to-gray-600',
 };
 
+const categoryFallbackColors = {
+  Wedding: '#ec4899', Birthday: '#8b5cf6', Corporate: '#3b82f6', College: '#22c55e',
+  Festival: '#f59e0b', Anniversary: '#f43f5e', Party: '#ef4444', Other: '#6b7280',
+};
+
 const fallbackDecorations = [
-  { _id: '1', title: 'Wedding Floral Arch', category: 'Wedding', image: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=600&h=400&fit=crop', description: 'Beautiful floral arch decoration for wedding ceremonies' },
-  { _id: '2', title: 'Birthday Balloon Setup', category: 'Birthday', image: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=600&h=400&fit=crop', description: 'Colorful balloon decoration for birthday parties' },
-  { _id: '3', title: 'Corporate Stage Design', category: 'Corporate', image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&h=400&fit=crop', description: 'Professional stage setup for corporate events' },
-  { _id: '4', title: 'Diwali Rangoli Display', category: 'Festival', image: 'https://images.unsplash.com/photo-1551818255-e6e10975bc17?w=600&h=400&fit=crop', description: 'Traditional rangoli decoration for Diwali' },
-  { _id: '5', title: 'Wedding Mandap Decor', category: 'Wedding', image: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=600&h=400&fit=crop', description: 'Traditional Indian wedding mandap decoration' },
-  { _id: '6', title: 'DJ Night Lighting', category: 'Party', image: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=600&h=400&fit=crop', description: 'Neon and laser lighting setup for DJ nights' },
+  { _id: '1', title: 'Wedding Floral Arch', category: 'Wedding', image: 'https://images.pexels.com/photos/1444442/pexels-photo-1444442.jpeg?w=600&h=400&fit=crop', description: 'Beautiful floral arch decoration for wedding ceremonies' },
+  { _id: '2', title: 'Birthday Balloon Setup', category: 'Birthday', image: 'https://images.pexels.com/photos/5765827/pexels-photo-5765827.jpeg?w=600&h=400&fit=crop', description: 'Colorful balloon decoration for birthday parties' },
+  { _id: '3', title: 'Corporate Stage Design', category: 'Corporate', image: 'https://images.pexels.com/photos/2608517/pexels-photo-2608517.jpeg?w=600&h=400&fit=crop', description: 'Professional stage setup for corporate events' },
+  { _id: '4', title: 'Diwali Rangoli Display', category: 'Festival', image: 'https://images.pexels.com/photos/6726362/pexels-photo-6726362.jpeg?w=600&h=400&fit=crop', description: 'Traditional rangoli decoration for Diwali' },
+  { _id: '5', title: 'Wedding Mandap Decor', category: 'Wedding', image: 'https://images.pexels.com/photos/1616113/pexels-photo-1616113.jpeg?w=600&h=400&fit=crop', description: 'Traditional Indian wedding mandap decoration' },
+  { _id: '6', title: 'DJ Night Lighting', category: 'Party', image: 'https://images.pexels.com/photos/1749057/pexels-photo-1749057.jpeg?w=600&h=400&fit=crop', description: 'Neon and laser lighting setup for DJ nights' },
 ];
 
 const categories = ['All', 'Wedding', 'Birthday', 'Corporate', 'Festival', 'Anniversary', 'Party', 'College'];
@@ -61,10 +66,16 @@ export default function Decorations() {
       if (Array.isArray(decs) && decs.length > 0) {
         setDecorations(decs);
       } else {
-        setDecorations(fallbackDecorations);
+        const filtered = categoryFilter
+          ? fallbackDecorations.filter(d => d.category === categoryFilter)
+          : fallbackDecorations;
+        setDecorations(filtered.length > 0 ? filtered : fallbackDecorations);
       }
     } catch {
-      setDecorations(fallbackDecorations);
+      const filtered = categoryFilter
+        ? fallbackDecorations.filter(d => d.category === categoryFilter)
+        : fallbackDecorations;
+      setDecorations(filtered.length > 0 ? filtered : fallbackDecorations);
     } finally {
       setLoading(false);
     }
@@ -185,9 +196,14 @@ export default function Decorations() {
                   }}
                 >
                 <img
-                  src={item.image || 'https://images.unsplash.com/photo-1519741497674-611481863552?w=600&h=400&fit=crop'}
+                  src={item.image}
                   alt={item.title}
                   className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
+                  onError={(e) => {
+                    const color = categoryFallbackColors[item.category] || '#6b7280';
+                    const emoji = categoryEmojis[item.category] || '✨';
+                    e.target.src = `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:${color};stop-opacity:1"/><stop offset="100%" style="stop-color:${color};stop-opacity:0.7"/></linearGradient></defs><rect width="600" height="400" fill="url(#g)"/><text x="300" y="170" font-size="64" text-anchor="middle" fill="white">${emoji}</text><text x="300" y="240" font-size="20" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="bold">${item.title || ''}</text><text x="300" y="270" font-size="14" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-family="sans-serif">${item.category || ''}</text></svg>`)}`;
+                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <div className="absolute top-3 left-3">

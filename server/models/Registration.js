@@ -13,6 +13,11 @@ const registrationSchema = new mongoose.Schema(
       ref: 'Event',
       required: [true, 'Event reference is required'],
     },
+    organizer: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+    },
     registrationDate: {
       type: Date,
       default: Date.now,
@@ -41,6 +46,18 @@ const registrationSchema = new mongoose.Schema(
       type: Number,
       required: [true, 'Total amount is required'],
       min: [0, 'Total amount cannot be negative'],
+    },
+    addOns: [{
+      name: String,
+      price: Number,
+      quantity: { type: Number, default: 1 },
+      category: String,
+      unit: { type: String, default: 'fixed' },
+    }],
+    addOnsTotal: {
+      type: Number,
+      default: 0,
+      min: [0, 'Add-ons total cannot be negative'],
     },
   },
   {

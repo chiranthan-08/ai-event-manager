@@ -1,5 +1,7 @@
 import Event from '../models/Event.js';
 
+const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 export const getEvents = async (req, res) => {
   try {
     const { page = 1, limit = 12, category, status, search } = req.query;
@@ -7,10 +9,12 @@ export const getEvents = async (req, res) => {
     if (category && category !== 'All') filter.category = category;
     if (status) filter.status = status;
     if (search) {
+      const safe = escapeRegex(search);
       filter.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { venue: { $regex: search, $options: 'i' } },
-        { location: { $regex: search, $options: 'i' } },
+        { title: { $regex: safe, $options: 'i' } },
+        { venue: { $regex: safe, $options: 'i' } },
+        { location: { $regex: safe, $options: 'i' } },
+        { category: { $regex: safe, $options: 'i' } },
       ];
     }
 

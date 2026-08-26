@@ -19,7 +19,7 @@ export default function ClientTickets() {
     try {
       setLoading(true);
       const response = await getMyRegistrations();
-      setTickets(response.data.tickets || response.data);
+      setTickets(response.data.registrations || response.data.tickets || []);
     } catch (error) {
       toast.error('Failed to load tickets');
     } finally {

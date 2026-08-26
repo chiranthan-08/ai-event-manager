@@ -25,6 +25,14 @@ const decorationSchema = new mongoose.Schema(
       },
       required: [true, 'Decoration category is required'],
     },
+    decorationType: {
+      type: String,
+      enum: {
+        values: ['Stage', 'Lighting', 'Floral', 'Table', 'Entrance', 'Backdrop', 'Other'],
+        message: '{VALUE} is not a valid decoration type',
+      },
+      default: 'Other',
+    },
     image: {
       type: String,
       default: '',
@@ -33,6 +41,40 @@ const decorationSchema = new mongoose.Schema(
       type: String,
       maxlength: [2000, 'Description cannot exceed 2000 characters'],
       default: '',
+    },
+    priceRange: {
+      type: String,
+      default: '',
+    },
+    duration: {
+      type: String,
+      default: '',
+    },
+    capacity: {
+      type: String,
+      default: '',
+    },
+    venue: {
+      type: String,
+      default: '',
+    },
+    rating: {
+      type: Number,
+      default: 0,
+    },
+    reviews: {
+      type: Number,
+      default: 0,
+    },
+    includes: [{
+      type: String,
+    }],
+    designs: [{
+      type: String,
+    }],
+    contact: {
+      phone: { type: String, default: '' },
+      email: { type: String, default: '' },
     },
     event: {
       type: mongoose.Schema.Types.ObjectId,

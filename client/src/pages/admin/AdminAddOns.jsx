@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Search, Edit2, Trash2, Package, Eye } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Package } from 'lucide-react';
 import Modal from '../../components/Modal';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import EmptyState from '../../components/EmptyState';
@@ -47,10 +47,22 @@ export default function AdminAddOns() {
     setFormData({ ...formData, [name]: type === 'checkbox' ? checked : value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    toast.success(editingAddOn ? 'Add-on updated' : 'Add-on created');
-    resetForm();
+    try {
+      const payload = { ...formData, price: Number(formData.price) };
+      if (editingAddOn) {
+        await addOnService.updateAddOn(editingAddOn._id, payload);
+        toast.success('Add-on updated');
+      } else {
+        await addOnService.createAddOn(payload);
+        toast.success('Add-on created');
+      }
+      resetForm();
+      fetchAddOns();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to save add-on');
+    }
   };
 
   const resetForm = () => {
@@ -143,7 +155,7 @@ export default function AdminAddOns() {
                   <tr key={addOn._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <img src={addOn.image} alt={addOn.name} className="w-10 h-10 rounded-lg object-cover" onError={(e) => { e.target.src = `https://via.placeholder.com/40/f97316/fff?text=${addOn.category.charAt(0)}`; }} />
+                        <img src={addOn.image} alt={addOn.name} className="w-10 h-10 rounded-lg object-cover" onError={(e) => { e.target.src = `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><rect width="40" height="40" fill="#f97316" rx="8"/><text x="20" y="26" font-size="16" text-anchor="middle" fill="white" font-family="sans-serif">${addOn.category.charAt(0)}</text></svg>`)}`; }} />
                         <div>
                           <p className="font-medium text-gray-900">{addOn.name}</p>
                           <p className="text-sm text-gray-500 truncate max-w-xs">{addOn.description}</p>
@@ -232,7 +244,16 @@ export default function AdminAddOns() {
             <p className="text-gray-600">Are you sure you want to delete <strong>{deleteConfirm.name}</strong>?</p>
             <div className="flex justify-end gap-3 mt-6">
               <button onClick={() => setDeleteConfirm(null)} className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">Cancel</button>
-              <button onClick={() => { toast.success('Add-on deleted'); setDeleteConfirm(null); }} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">Delete</button>
+              <button onClick={async () => {
+                try {
+                  await addOnService.deleteAddOn(deleteConfirm._id);
+                  toast.success('Add-on deleted');
+                  setDeleteConfirm(null);
+                  fetchAddOns();
+                } catch (err) {
+                  toast.error(err.response?.data?.message || 'Failed to delete');
+                }
+              }} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">Delete</button>
             </div>
           </div>
         </Modal>

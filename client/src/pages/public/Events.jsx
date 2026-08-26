@@ -1,12 +1,23 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Calendar, MapPin, Users, Search, Sparkles } from 'lucide-react';
 import { getEvents } from '../../services/eventService';
 
 const categories = ['All', 'Wedding', 'Birthday', 'Corporate', 'College', 'Festival', 'Anniversary', 'Party'];
 
+const categoryColors = {
+  Wedding: '#ec4899', Birthday: '#8b5cf6', Corporate: '#3b82f6', College: '#22c55e',
+  Festival: '#f59e0b', Anniversary: '#f43f5e', Party: '#ef4444', Other: '#6b7280',
+};
+
+const categoryEmojis = {
+  Wedding: '💒', Birthday: '🎂', Corporate: '💼', College: '🎓',
+  Festival: '🪔', Anniversary: '💐', Party: '🎉', Other: '✨',
+};
+
 export default function Events() {
-  const [search, setSearch] = useState('');
+  const [searchParams] = useSearchParams();
+  const [search, setSearch] = useState(searchParams.get('search') || '');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -51,6 +62,7 @@ export default function Events() {
       setLoading(true);
       const params = { limit: 50 };
       if (selectedCategory !== 'All') params.category = selectedCategory;
+      if (search.trim()) params.search = search.trim();
       const response = await getEvents(params);
       setEvents(response.data.events || []);
     } catch (error) {
@@ -112,7 +124,7 @@ export default function Events() {
                     className="w-full py-3 text-gray-800 placeholder-gray-400 focus:outline-none"
                   />
                 </div>
-                <button className="btn-indian text-white px-8 py-3 rounded-xl font-semibold">
+                <button onClick={() => setShowSuggestions(false)} className="btn-indian text-white px-8 py-3 rounded-xl font-semibold">
                   Search
                 </button>
 
@@ -203,9 +215,14 @@ export default function Events() {
               >
                 <div className="relative h-52 overflow-hidden">
                   <img
-                    src={event.images?.[0] || event.image || 'https://images.unsplash.com/photo-1519741497674-611481863552?w=600&h=400&fit=crop'}
+                    src={event.images?.[0] || event.image}
                     alt={event.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    onError={(e) => {
+                      const color = categoryColors[event.category] || '#6b7280';
+                      const emoji = categoryEmojis[event.category] || '✨';
+                      e.target.src = `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:${color};stop-opacity:1"/><stop offset="100%" style="stop-color:${color};stop-opacity:0.7"/></linearGradient></defs><rect width="600" height="400" fill="url(#g)"/><text x="300" y="180" font-size="64" text-anchor="middle" fill="white">${emoji}</text><text x="300" y="250" font-size="22" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="bold">${event.title || ''}</text><text x="300" y="285" font-size="16" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-family="sans-serif">${event.category || ''}</text></svg>`)}`;
+                    }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
                   <div className="absolute top-4 left-4">

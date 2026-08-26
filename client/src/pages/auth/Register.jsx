@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 
 const roles = [
   { value: 'client', label: 'Client', icon: Users, description: 'Book events & services' },
-  { value: 'employee', label: 'Employee', icon: Briefcase, description: 'Manage events & tasks' },
+  { value: 'employee', label: 'Event Organizer', icon: Briefcase, description: 'Manage events & tasks' },
 ];
 
 export default function Register() {

@@ -44,7 +44,6 @@ export default function Navbar() {
               <span className="text-xl font-bold bg-gradient-to-r from-saffron-500 to-indian-red bg-clip-text text-transparent" style={{ fontFamily: "'Playfair Display', serif" }}>
                 AI Event Manager
               </span>
-              <div className="text-[10px] text-gray-400 tracking-wider uppercase">Celebrate Every Moment</div>
             </div>
           </Link>
 
@@ -209,7 +208,7 @@ function NavLink({ to, children, highlight }) {
   return (
     <Link
       to={to}
-      className={`flex items-center gap-1 px-4 py-2 rounded-lg font-medium transition-all ${
+      className={`flex items-center gap-1 px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-all ${
         highlight
           ? 'text-saffron-500 hover:bg-saffron-50'
           : 'text-gray-700 hover:text-saffron-500 hover:bg-saffron-50'

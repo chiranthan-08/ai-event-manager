@@ -17,6 +17,17 @@ const categoryIcons = {
   'Props': '🎭',
 };
 
+const categoryColors = {
+  'Flowers': { bg: '#fce7f3', fg: '#ec4899', gradient: 'from-pink-400 to-rose-500' },
+  'Food & Snacks': { bg: '#fef3c7', fg: '#f59e0b', gradient: 'from-amber-400 to-orange-500' },
+  'Decor': { bg: '#ede9fe', fg: '#8b5cf6', gradient: 'from-violet-400 to-purple-500' },
+  'Return Gifts': { bg: '#dcfce7', fg: '#22c55e', gradient: 'from-green-400 to-emerald-500' },
+  'Lighting': { bg: '#fef9c3', fg: '#eab308', gradient: 'from-yellow-400 to-amber-500' },
+  'Furniture': { bg: '#dbeafe', fg: '#3b82f6', gradient: 'from-blue-400 to-indigo-500' },
+  'Tableware': { bg: '#e0e7ff', fg: '#6366f1', gradient: 'from-indigo-400 to-blue-500' },
+  'Props': { bg: '#ffe4e6', fg: '#f43f5e', gradient: 'from-rose-400 to-red-500' },
+};
+
 export default function AddOns() {
   const [addOns, setAddOns] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -104,7 +115,11 @@ export default function AddOns() {
                     src={addOn.image}
                     alt={addOn.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    onError={(e) => { e.target.src = `https://via.placeholder.com/400x300/f97316/ffffff?text=${encodeURIComponent(addOn.category)}`; }}
+                    onError={(e) => {
+                      const colors = categoryColors[addOn.category] || { bg: '#f3f4f6', fg: '#6b7280', gradient: 'from-gray-400 to-gray-500' };
+                      const icon = categoryIcons[addOn.category] || '✨';
+                      e.target.src = `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:${colors.fg};stop-opacity:0.9"/><stop offset="100%" style="stop-color:${colors.fg};stop-opacity:0.6"/></linearGradient></defs><rect width="400" height="300" fill="url(#g)"/><text x="200" y="130" font-size="48" text-anchor="middle" fill="white">${icon}</text><text x="200" y="180" font-size="16" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="bold">${addOn.name || ''}</text><text x="200" y="210" font-size="13" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-family="sans-serif">${addOn.category || ''}</text></svg>`)}`;
+                    }}
                   />
                   <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold text-orange-700">
                     {categoryIcons[addOn.category]} {addOn.category}

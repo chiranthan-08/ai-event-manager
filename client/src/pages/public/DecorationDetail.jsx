@@ -1,10 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, MapPin, Clock, Users, Star, CheckCircle, Calendar, Phone, Mail, IndianRupee, Sparkles, Heart } from 'lucide-react';
+import { ArrowLeft, MapPin, Clock, Users, Star, CheckCircle, Calendar, Phone, Mail, IndianRupee, Sparkles, Heart, Loader2 } from 'lucide-react';
+import { getDecorationById } from '../../services/decorationService';
 
-const allDecorations = [
+const categoryFallbackColors = {
+  Wedding: '#ec4899', Birthday: '#8b5cf6', Corporate: '#3b82f6', College: '#22c55e',
+  Festival: '#f59e0b', Anniversary: '#f43f5e', Party: '#ef4444', Other: '#6b7280',
+};
+
+const fallbackDecorations = [
   {
-    id: 1, title: 'Wedding Floral Arch', category: 'Wedding', image: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=600&h=400&fit=crop',
+    id: 1, title: 'Wedding Floral Arch', category: 'Wedding', image: 'https://images.pexels.com/photos/1444442/pexels-photo-1444442.jpeg?w=600&h=400&fit=crop',
     description: 'Beautiful floral arch decoration for wedding ceremonies with fresh roses and marigolds',
     price: '₹25,000 - ₹50,000', duration: '1 Day', capacity: '200-500 guests',
     venue: 'Indoor / Outdoor', rating: 4.8, reviews: 124,
@@ -13,7 +19,7 @@ const allDecorations = [
     contact: { phone: '+91 98765 43210', email: 'weddings@aievent.com' },
   },
   {
-    id: 2, title: 'Birthday Balloon Setup', category: 'Birthday', image: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=600&h=400&fit=crop',
+    id: 2, title: 'Birthday Balloon Setup', category: 'Birthday', image: 'https://images.pexels.com/photos/5765827/pexels-photo-5765827.jpeg?w=600&h=400&fit=crop',
     description: 'Colorful balloon decoration for birthday parties with themed colors',
     price: '₹8,000 - ₹20,000', duration: '1 Day', capacity: '50-150 guests',
     venue: 'Indoor / Outdoor', rating: 4.6, reviews: 89,
@@ -22,7 +28,7 @@ const allDecorations = [
     contact: { phone: '+91 98765 43211', email: 'birthdays@aievent.com' },
   },
   {
-    id: 3, title: 'Corporate Stage Design', category: 'Corporate', image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&h=400&fit=crop',
+    id: 3, title: 'Corporate Stage Design', category: 'Corporate', image: 'https://images.pexels.com/photos/2608517/pexels-photo-2608517.jpeg?w=600&h=400&fit=crop',
     description: 'Professional stage setup for corporate events with LED screens',
     price: '₹1,50,000 - ₹5,00,000', duration: '1-3 Days', capacity: '500-5000 guests',
     venue: 'Indoor Convention Center', rating: 4.9, reviews: 201,
@@ -31,7 +37,7 @@ const allDecorations = [
     contact: { phone: '+91 98765 43212', email: 'corporate@aievent.com' },
   },
   {
-    id: 4, title: 'Diwali Rangoli Display', category: 'Festival', image: 'https://images.unsplash.com/photo-1551818255-e6e10975bc17?w=600&h=400&fit=crop',
+    id: 4, title: 'Diwali Rangoli Display', category: 'Festival', image: 'https://images.pexels.com/photos/6726362/pexels-photo-6726362.jpeg?w=600&h=400&fit=crop',
     description: 'Traditional rangoli decoration for Diwali celebrations with diyas',
     price: '₹15,000 - ₹35,000', duration: '1 Day', capacity: '100-300 guests',
     venue: 'Indoor / Outdoor', rating: 4.7, reviews: 156,
@@ -40,7 +46,7 @@ const allDecorations = [
     contact: { phone: '+91 98765 43213', email: 'festivals@aievent.com' },
   },
   {
-    id: 5, title: 'Wedding Mandap Decor', category: 'Wedding', image: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=600&h=400&fit=crop',
+    id: 5, title: 'Wedding Mandap Decor', category: 'Wedding', image: 'https://images.pexels.com/photos/1616113/pexels-photo-1616113.jpeg?w=600&h=400&fit=crop',
     description: 'Traditional Indian wedding mandap decoration with flowers and lights',
     price: '₹40,000 - ₹1,20,000', duration: '1-2 Days', capacity: '300-1000 guests',
     venue: 'Outdoor / Banquet Hall', rating: 4.9, reviews: 178,
@@ -49,7 +55,7 @@ const allDecorations = [
     contact: { phone: '+91 98765 43214', email: 'mandap@aievent.com' },
   },
   {
-    id: 6, title: 'DJ Night Lighting', category: 'Party', image: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=600&h=400&fit=crop',
+    id: 6, title: 'DJ Night Lighting', category: 'Party', image: 'https://images.pexels.com/photos/1749057/pexels-photo-1749057.jpeg?w=600&h=400&fit=crop',
     description: 'Neon and laser lighting setup for DJ nights and parties',
     price: '₹30,000 - ₹80,000', duration: '1 Night', capacity: '200-1000 guests',
     venue: 'Indoor Club / Outdoor', rating: 4.5, reviews: 93,
@@ -58,7 +64,7 @@ const allDecorations = [
     contact: { phone: '+91 98765 43215', email: 'parties@aievent.com' },
   },
   {
-    id: 7, title: 'Anniversary Rose Petals', category: 'Anniversary', image: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=600&h=400&fit=crop',
+    id: 7, title: 'Anniversary Rose Petals', category: 'Anniversary', image: 'https://images.pexels.com/photos/1616113/pexels-photo-1616113.jpeg?w=600&h=400&fit=crop',
     description: 'Romantic rose petal decoration for anniversary celebrations',
     price: '₹12,000 - ₹30,000', duration: '1 Day', capacity: '50-100 guests',
     venue: 'Indoor / Outdoor / Rooftop', rating: 4.8, reviews: 67,
@@ -67,7 +73,7 @@ const allDecorations = [
     contact: { phone: '+91 98765 43216', email: 'anniversary@aievent.com' },
   },
   {
-    id: 8, title: 'College Fest Stage', category: 'College', image: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600&h=400&fit=crop',
+    id: 8, title: 'College Fest Stage', category: 'College', image: 'https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg?w=600&h=400&fit=crop',
     description: 'Vibrant stage decoration for college festivals with banners',
     price: '₹50,000 - ₹1,50,000', duration: '1-3 Days', capacity: '1000-5000 guests',
     venue: 'Outdoor Ground / Auditorium', rating: 4.4, reviews: 112,
@@ -76,7 +82,7 @@ const allDecorations = [
     contact: { phone: '+91 98765 43217', email: 'college@aievent.com' },
   },
   {
-    id: 9, title: 'Royal Wedding Setup', category: 'Wedding', image: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=600&h=400&fit=crop',
+    id: 9, title: 'Royal Wedding Setup', category: 'Wedding', image: 'https://images.pexels.com/photos/265856/pexels-photo-265856.jpeg?w=600&h=400&fit=crop',
     description: 'Grand royal themed wedding decoration with chandeliers',
     price: '₹2,00,000 - ₹5,00,000', duration: '2-3 Days', capacity: '500-2000 guests',
     venue: 'Palace / Heritage Venue', rating: 5.0, reviews: 45,
@@ -85,7 +91,7 @@ const allDecorations = [
     contact: { phone: '+91 98765 43218', email: 'royal@aievent.com' },
   },
   {
-    id: 10, title: 'Holi Celebration', category: 'Festival', image: 'https://images.unsplash.com/photo-1551818255-e6e10975bc17?w=600&h=400&fit=crop',
+    id: 10, title: 'Holi Celebration', category: 'Festival', image: 'https://images.pexels.com/photos/2833037/pexels-photo-2833037.jpeg?w=600&h=400&fit=crop',
     description: 'Colorful Holi festival decoration with organic colors',
     price: '₹20,000 - ₹60,000', duration: '1 Day', capacity: '200-1000 guests',
     venue: 'Outdoor Ground', rating: 4.6, reviews: 134,
@@ -94,7 +100,7 @@ const allDecorations = [
     contact: { phone: '+91 98765 43219', email: 'holi@aievent.com' },
   },
   {
-    id: 11, title: 'Kids Party Theme', category: 'Birthday', image: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=600&h=400&fit=crop',
+    id: 11, title: 'Kids Party Theme', category: 'Birthday', image: 'https://images.pexels.com/photos/1729784/pexels-photo-1729784.jpeg?w=600&h=400&fit=crop',
     description: 'Fun themed decoration for kids birthday parties',
     price: '₹10,000 - ₹25,000', duration: '1 Day', capacity: '30-80 guests',
     venue: 'Indoor / Garden', rating: 4.7, reviews: 108,
@@ -103,7 +109,7 @@ const allDecorations = [
     contact: { phone: '+91 98765 43220', email: 'kids@aievent.com' },
   },
   {
-    id: 12, title: 'Corporate Dinner', category: 'Corporate', image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&h=400&fit=crop',
+    id: 12, title: 'Corporate Dinner', category: 'Corporate', image: 'https://images.pexels.com/photos/1395967/pexels-photo-1395967.jpeg?w=600&h=400&fit=crop',
     description: 'Elegant dinner setup for corporate events',
     price: '₹75,000 - ₹2,00,000', duration: '1 Evening', capacity: '100-500 guests',
     venue: 'Banquet Hall / Restaurant', rating: 4.8, reviews: 87,
@@ -113,16 +119,70 @@ const allDecorations = [
   },
 ];
 
+function mapApiDecoration(dec) {
+  return {
+    _id: dec._id,
+    title: dec.title,
+    category: dec.category,
+    image: dec.image,
+    description: dec.description,
+    price: dec.priceRange || '₹15,000 - ₹50,000',
+    duration: dec.duration || '1 Day',
+    capacity: dec.capacity || '100-500 guests',
+    venue: dec.venueType || 'Indoor / Outdoor',
+    rating: dec.rating || 4.7,
+    reviews: dec.reviewCount || 50,
+    includes: dec.includes || ['Professional Setup', 'Quality Materials', 'On-site Coordinator', 'Customization Options'],
+    designs: dec.designOptions || ['Standard Package', 'Premium Package', 'Luxury Package'],
+    contact: dec.contact || { phone: '+91 98765 43210', email: 'info@aievent.com' },
+  };
+}
+
+const categoryEmojis = {
+  Wedding: '💒', Birthday: '🎂', Corporate: '💼', College: '🎓',
+  Festival: '🪔', Anniversary: '💐', Party: '🎉', Other: '✨',
+};
+
 export default function DecorationDetail() {
   const { id } = useParams();
-  const decoration = allDecorations.find((d) => d.id === parseInt(id));
+  const [decoration, setDecoration] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [activeDesign, setActiveDesign] = useState(0);
+
+  useEffect(() => {
+    const fetchDecoration = async () => {
+      setLoading(true);
+      try {
+        const res = await getDecorationById(id);
+        const data = res.data?.decoration || res.data;
+        if (data && data._id) {
+          setDecoration(mapApiDecoration(data));
+        } else {
+          const fb = fallbackDecorations.find(d => String(d.id) === String(id) || d._id === id);
+          setDecoration(fb || null);
+        }
+      } catch {
+        const fb = fallbackDecorations.find(d => String(d.id) === String(id) || d._id === id);
+        setDecoration(fb || null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDecoration();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-12 h-12 text-saffron-500 animate-spin" />
+      </div>
+    );
+  }
 
   if (!decoration) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-orange-50 via-white to-green-50">
-        <div className="flex flex-col items-center justify-center py-32">
-          <span className="text-6xl mb-4">🪔</span>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Decoration Not Found</h2>
           <p className="text-gray-500 mb-6">The decoration you're looking for doesn't exist.</p>
           <Link to="/decorations" className="bg-gradient-to-r from-saffron-500 to-amber-500 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all">
@@ -138,7 +198,16 @@ export default function DecorationDetail() {
 
       {/* Hero Image */}
       <div className="relative h-[50vh] min-h-[400px] overflow-hidden">
-        <img src={decoration.image} alt={decoration.title} className="w-full h-full object-cover" />
+        <img
+          src={decoration.image}
+          alt={decoration.title}
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            const color = categoryFallbackColors[decoration.category] || '#6b7280';
+            const emoji = categoryEmojis[decoration.category] || '✨';
+            e.target.src = `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:${color};stop-opacity:1"/><stop offset="100%" style="stop-color:${color};stop-opacity:0.7"/></linearGradient></defs><rect width="800" height="500" fill="url(#g)"/><text x="400" y="220" font-size="72" text-anchor="middle" fill="white">${emoji}</text><text x="400" y="300" font-size="28" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="bold">${decoration.title}</text><text x="400" y="340" font-size="18" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-family="sans-serif">${decoration.category}</text></svg>`)}`;
+          }}
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
         <div className="absolute top-6 left-6">
           <Link to="/decorations" className="flex items-center gap-2 bg-white/90 backdrop-blur-sm text-gray-800 px-4 py-2 rounded-xl font-medium hover:bg-white transition-all shadow-lg">

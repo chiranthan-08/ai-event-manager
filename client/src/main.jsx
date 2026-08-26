@@ -15,11 +15,13 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <App />
         <Toaster
           position="top-right"
+          containerStyle={{ top: 80 }}
           toastOptions={{
             duration: 4000,
             style: {
               background: '#363636',
               color: '#fff',
+              zIndex: 9999,
             },
             success: {
               iconTheme: {

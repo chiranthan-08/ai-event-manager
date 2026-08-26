@@ -18,7 +18,7 @@ export const protect = async (req, res, next) => {
       return res.status(401).json({ success: false, message: 'User not found' });
     }
 
-    req.user = { id: user._id.toString(), role: user.role, name: user.name, email: user.email };
+    req.user = { id: user._id.toString(), role: user.role, name: user.name, email: user.email, organizerId: user.organizerId };
     next();
   } catch (error) {
     if (error.name === 'JsonWebTokenError') {

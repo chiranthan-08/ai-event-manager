@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Sidebar from '../components/Sidebar';
+import ErrorBoundary from '../components/ErrorBoundary';
 import {
   Menu,
   Bell,
-  Search,
   ChevronDown,
   LogOut,
   User,
@@ -24,8 +24,14 @@ import {
 
 const roleLabels = {
   admin: 'Admin Panel',
-  employee: 'Employee Portal',
+  employee: 'Event Organizer',
   client: 'Client Portal',
+};
+
+const roleDisplayName = {
+  admin: 'Admin',
+  employee: 'Event Organizer',
+  client: 'Client',
 };
 
 const roleAccent = {
@@ -49,12 +55,19 @@ const mobileMenuConfig = {
   employee: [
     { label: 'Dashboard', path: '/employee/dashboard', icon: LayoutDashboard },
     { label: 'My Events', path: '/employee/events', icon: Calendar },
+    { label: 'Bookings', path: '/employee/bookings', icon: BookOpen },
+    { label: 'Clients', path: '/employee/clients', icon: Users },
+    { label: 'Payments', path: '/employee/payments', icon: CreditCard },
+    { label: 'Decorations', path: '/employee/decorations', icon: Palette },
+    { label: 'Add-Ons', path: '/employee/add-ons', icon: Package },
+    { label: 'Settings', path: '/employee/settings', icon: Settings },
     { label: 'AI Assistant', path: '/employee/ai-assistant', icon: Sparkles },
   ],
   client: [
     { label: 'Dashboard', path: '/client/dashboard', icon: LayoutDashboard },
     { label: 'My Bookings', path: '/client/bookings', icon: BookOpen },
     { label: 'Tickets', path: '/client/tickets', icon: Ticket },
+    { label: 'Settings', path: '/client/settings', icon: Settings },
     { label: 'AI Assistant', path: '/client/ai-assistant', icon: Sparkles },
   ],
 };
@@ -121,7 +134,13 @@ export default function DashboardLayout({ role = 'client' }) {
               <p className="text-sm font-semibold text-gray-900 truncate">
                 {displayName}
               </p>
-              <p className="text-xs text-gray-500 capitalize">{role}</p>
+              <p className="text-xs text-gray-500">
+                {role === 'employee' && user?.organizerId ? (
+                  <span className="font-mono font-medium text-emerald-600">{user.organizerId}</span>
+                ) : (
+                  <span>{roleDisplayName[role] || role}</span>
+                )}
+              </p>
             </div>
           </div>
         </div>
@@ -137,7 +156,7 @@ export default function DashboardLayout({ role = 'client' }) {
                 onClick={() => setMobileSidebarOpen(false)}
                 className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                   isActive
-                    ? 'bg-primary-50 text-primary-700'
+                    ? 'bg-emerald-50 text-emerald-700'
                     : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                 }`}
               >
@@ -163,7 +182,7 @@ export default function DashboardLayout({ role = 'client' }) {
       </aside>
 
       <div className="hidden lg:block">
-        <Sidebar role={role} />
+        <Sidebar role={role} user={user} />
       </div>
 
       <div className="lg:ml-64 transition-all duration-300">
@@ -175,15 +194,6 @@ export default function DashboardLayout({ role = 'client' }) {
             >
               <Menu size={20} />
             </button>
-
-            <div className="hidden sm:flex items-center gap-2 bg-gray-100 rounded-lg px-3 py-2 w-64">
-              <Search size={16} className="text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search..."
-                className="bg-transparent text-sm text-gray-700 placeholder-gray-400 outline-none w-full"
-              />
-            </div>
           </div>
 
           <div className="flex items-center gap-3">
@@ -235,7 +245,7 @@ export default function DashboardLayout({ role = 'client' }) {
                 }}
                 className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-100 transition-colors"
               >
-                <div className="w-8 h-8 bg-gradient-to-br from-violet-500 to-indigo-500 rounded-full flex items-center justify-center">
+                <div className={`w-8 h-8 bg-gradient-to-br ${roleGradient[role]} rounded-full flex items-center justify-center`}>
                   <span className="text-sm font-medium text-white">
                     {initials}
                   </span>
@@ -244,7 +254,13 @@ export default function DashboardLayout({ role = 'client' }) {
                   <p className="text-sm font-medium text-gray-700">
                     {displayName}
                   </p>
-                  <p className="text-xs text-gray-400 capitalize">{role}</p>
+                  <p className="text-xs text-gray-400">
+                    {role === 'employee' && user?.organizerId ? (
+                      <span className="font-mono">{user.organizerId}</span>
+                    ) : (
+                      <span>{roleDisplayName[role] || role}</span>
+                    )}
+                  </p>
                 </div>
                 <ChevronDown
                   size={16}
@@ -269,7 +285,7 @@ export default function DashboardLayout({ role = 'client' }) {
                       <span
                         className={`inline-block mt-1 px-2 py-0.5 text-xs font-medium rounded-full ${roleAccent[role]}`}
                       >
-                        {role}
+                        {roleDisplayName[role] || role}
                       </span>
                     </div>
                     <Link
@@ -281,7 +297,10 @@ export default function DashboardLayout({ role = 'client' }) {
                       Dashboard
                     </Link>
                     <button
-                      onClick={() => setProfileOpen(false)}
+                      onClick={() => {
+                        setProfileOpen(false);
+                        navigate(`/${role}/settings`);
+                      }}
                       className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                     >
                       <Settings size={16} />
@@ -307,7 +326,9 @@ export default function DashboardLayout({ role = 'client' }) {
         </header>
 
         <main className="p-4 lg:p-6">
-          <Outlet />
+          <ErrorBoundary>
+            <Outlet />
+          </ErrorBoundary>
         </main>
       </div>
     </div>
