@@ -362,18 +362,18 @@ export default function Home() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-3">
                   <div className="rounded-2xl overflow-hidden shadow-2xl card-hover">
-                    <img src="https://images.pexels.com/photos/1444442/pexels-photo-1444442.jpeg?w=400&h=300&fit=crop" alt="Wedding" className="w-full h-40 object-cover" />
+                    <img src="https://images.pexels.com/photos/1444442/pexels-photo-1444442.jpeg?w=400&h=280&fit=crop" alt="Wedding" className="w-full h-40 object-cover" />
                   </div>
                   <div className="rounded-2xl overflow-hidden shadow-2xl card-hover">
-                    <img src="https://images.pexels.com/photos/30274906/pexels-photo-30274906.jpeg?w=400&h=200&fit=crop" alt="Festival" className="w-full h-28 object-cover" />
+                    <img src="https://images.pexels.com/photos/30274906/pexels-photo-30274906.jpeg?w=400&h=280&fit=crop" alt="Festival" className="w-full h-40 object-cover" />
                   </div>
                 </div>
                 <div className="space-y-3 mt-6">
                   <div className="rounded-2xl overflow-hidden shadow-2xl card-hover">
-                    <img src="https://images.pexels.com/photos/3171837/pexels-photo-3171837.jpeg?w=400&h=200&fit=crop" alt="Party" className="w-full h-28 object-cover" />
+                    <img src="https://images.pexels.com/photos/3171837/pexels-photo-3171837.jpeg?w=400&h=280&fit=crop" alt="Party" className="w-full h-40 object-cover" />
                   </div>
                   <div className="rounded-2xl overflow-hidden shadow-2xl card-hover">
-                    <img src="https://images.pexels.com/photos/2608517/pexels-photo-2608517.jpeg?w=400&h=300&fit=crop" alt="Corporate" className="w-full h-40 object-cover" />
+                    <img src="https://images.pexels.com/photos/2608517/pexels-photo-2608517.jpeg?w=400&h=280&fit=crop" alt="Corporate" className="w-full h-40 object-cover" />
                   </div>
                 </div>
               </div>
@@ -454,7 +454,7 @@ export default function Home() {
               >
                 <div className="relative h-48 overflow-hidden">
                   <img
-                    src={event.images?.[0] || 'https://images.pexels.com/photos/1444442/pexels-photo-1444442.jpeg?w=600&h=400&fit=crop'}
+                    src={event.images?.[0] || (event.category === 'Birthday' ? 'https://images.pexels.com/photos/30870953/pexels-photo-30870953.jpeg?w=600&h=400&fit=crop' : 'https://images.pexels.com/photos/1444442/pexels-photo-1444442.jpeg?w=600&h=400&fit=crop')}
                     alt={event.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
@@ -468,6 +468,13 @@ export default function Home() {
                       ₹{event.ticketPrice}
                     </span>
                   </div>
+                  {event.category === 'Birthday' && (
+                    <div className="absolute top-3 right-3">
+                      <span className="bg-white/90 text-gray-800 text-xs font-bold px-3 py-1 rounded-full">
+                        🎂
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <div className="p-5">
                   <h3 className="font-bold text-gray-800 text-lg mb-2 group-hover:text-saffron-500 transition-colors">
