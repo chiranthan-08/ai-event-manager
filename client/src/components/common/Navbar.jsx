@@ -1,13 +1,16 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, X, User, LogOut, Calendar, ChevronDown, Sparkles } from 'lucide-react';
+import { Menu, X, User, LogOut, Calendar, ChevronDown, Sparkles, ShoppingCart } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useCart } from '../../context/CartContext';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const { user, logout, isAuthenticated } = useAuth();
+  const { getItemCount } = useCart();
   const navigate = useNavigate();
+  const cartCount = getItemCount();
 
   const handleLogout = () => {
     logout();
@@ -50,6 +53,7 @@ export default function Navbar() {
             <NavLink to="/">Home</NavLink>
             <NavLink to="/events">Events</NavLink>
             <NavLink to="/decorations">Decorations</NavLink>
+            <NavLink to="/add-ons">Add-Ons</NavLink>
             <NavLink to="/ai-assistant" highlight>
               <Sparkles className="w-4 h-4" />
               AI Assistant
@@ -64,6 +68,14 @@ export default function Navbar() {
 
           {/* Auth Buttons */}
           <div className="hidden md:flex items-center gap-3">
+            <Link to="/cart" className="relative p-2 text-gray-600 hover:text-saffron-500 transition-colors">
+              <ShoppingCart className="w-5 h-5" />
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-orange-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
             {isAuthenticated ? (
               <div className="relative">
                 <button
@@ -136,6 +148,11 @@ export default function Navbar() {
             <MobileNavLink to="/" onClick={() => setIsOpen(false)}>Home</MobileNavLink>
             <MobileNavLink to="/events" onClick={() => setIsOpen(false)}>Events</MobileNavLink>
             <MobileNavLink to="/decorations" onClick={() => setIsOpen(false)}>Decorations</MobileNavLink>
+            <MobileNavLink to="/add-ons" onClick={() => setIsOpen(false)}>Add-Ons</MobileNavLink>
+            <MobileNavLink to="/cart" onClick={() => setIsOpen(false)}>
+              <ShoppingCart className="w-4 h-4 text-saffron-500" />
+              Cart {cartCount > 0 && `(${cartCount})`}
+            </MobileNavLink>
             <MobileNavLink to="/ai-assistant" onClick={() => setIsOpen(false)}>
               <Sparkles className="w-4 h-4 text-saffron-500" />
               AI Assistant

@@ -22,6 +22,8 @@ import EventCategory from './pages/public/EventCategory';
 import EmployeeDetail from './pages/public/EmployeeDetail';
 import DecorationDetail from './pages/public/DecorationDetail';
 import Decorations from './pages/public/Decorations';
+import AddOns from './pages/public/AddOns';
+import Cart from './pages/public/Cart';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 
@@ -97,6 +99,8 @@ function App() {
           <Route path="employees/:id" element={<EmployeeDetail />} />
           <Route path="decorations" element={<Decorations />} />
           <Route path="decorations/:id" element={<DecorationDetail />} />
+          <Route path="add-ons" element={<AddOns />} />
+          <Route path="cart" element={<Cart />} />
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
         </Route>

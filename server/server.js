@@ -77,7 +77,10 @@ if (dbConnected) {
       { title: 'Corporate Stage Design', category: 'Corporate', image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600', description: 'Professional stage setup', event: events[2]._id },
     ]);
 
-    console.log('Database seeded: 4 users, 12 events, 2 employees, 5 decorations');
+    const { seedAddOns } = await import('./controllers/addOnController.js');
+    await seedAddOns();
+
+    console.log('Database seeded: 4 users, 12 events, 2 employees, 5 decorations, 40+ add-ons');
     console.log('Accounts: admin@example.com / admin123, priya@example.com / employee123, client@example.com / client123');
   } else {
     console.log('Database already has data, skipping seed.');
@@ -115,6 +118,7 @@ const paymentRoutes = (await import('./routes/payments.js')).default;
 const dashboardRoutes = (await import('./routes/dashboard.js')).default;
 const aiRoutes = (await import('./routes/ai.js')).default;
 const decorationRoutes = (await import('./routes/decorations.js')).default;
+const addOnRoutes = (await import('./routes/addOns.js')).default;
 
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes);
@@ -124,6 +128,7 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/decorations', decorationRoutes);
+app.use('/api/add-ons', addOnRoutes);
 
 // 404 handler
 app.use('/api/*', (req, res) => {
