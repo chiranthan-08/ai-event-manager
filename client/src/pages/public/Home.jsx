@@ -93,7 +93,7 @@ const categoryColors = {
 // Category-specific cover images for Featured Events section only
 const categoryFeaturedImages = {
   Wedding: 'https://images.pexels.com/photos/1444442/pexels-photo-1444442.jpeg?w=600&h=400&fit=crop',
-  Birthday: 'https://images.pexels.com/photos/30870953/pexels-photo-30870953.jpeg?w=600&h=400&fit=crop',
+  Birthday: 'https://images.pexels.com/photos/36704167/pexels-photo-36704167.jpeg?w=600&h=400&fit=crop',
   Corporate: 'https://images.pexels.com/photos/2608517/pexels-photo-2608517.jpeg?w=600&h=400&fit=crop',
   College: 'https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg?w=600&h=400&fit=crop',
   Festival: 'https://images.pexels.com/photos/30274906/pexels-photo-30274906.jpeg?w=600&h=400&fit=crop',
