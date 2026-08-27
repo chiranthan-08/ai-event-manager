@@ -472,7 +472,7 @@ export default function Home() {
               >
                 <div className="relative h-48 overflow-hidden">
                   <img
-                    src={event.images?.[0] || categoryFeaturedImages[event.category] || 'https://images.pexels.com/photos/1444442/pexels-photo-1444442.jpeg?w=600&h=400&fit=crop'}
+                    src={event.images?.[0] || categoryFeaturedImages[event.category] || 'https://images.pexels.com/photos/30870953/pexels-photo-30870953.jpeg?w=600&h=400&fit=crop'}
                     alt={event.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
