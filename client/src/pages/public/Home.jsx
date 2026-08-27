@@ -98,6 +98,7 @@ const categoryFeaturedImages = {
   Festival: 'https://images.pexels.com/photos/30274906/pexels-photo-30274906.jpeg?w=600&h=400&fit=crop',
   Party: 'https://images.pexels.com/photos/3171837/pexels-photo-3171837.jpeg?w=600&h=400&fit=crop',
   Anniversary: 'https://images.pexels.com/photos/1616113/pexels-photo-1616113.jpeg?w=600&h=400&fit=crop',
+  Birthday: 'https://images.pexels.com/photos/30870953/pexels-photo-30870953.jpeg?w=600&h=400&fit=crop';
   Other: 'https://images.pexels.com/photos/1444442/pexels-photo-1444442.jpeg?w=600&h=400&fit=crop',
 };
 
