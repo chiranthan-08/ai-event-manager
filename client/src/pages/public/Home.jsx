@@ -333,10 +333,20 @@ export default function Home() {
                           className="w-full px-4 py-3 text-left hover:bg-saffron-50 flex items-center gap-3 transition-colors"
                         >
                           <img
-                            src={item.event.images?.[0] || item.event.image}
-                            alt=""
-                            className="w-10 h-10 rounded-lg object-cover"
-                          />
+                            src={
+                              event.images?.[0] ||
+                              categoryFeaturedImages[event.category] ||'https://images.pexels.com/photos/1444442/pexels-photo-1444442.jpeg?w=600&h=400&fit=crop'}
+                            onError={(e) => {
+                              e.currentTarget.src =categoryFeaturedImages[event.category] ||'https://images.pexels.com/photos/1444442/pexels-photo-1444442.jpeg?w=600&h=400&fit=crop';
+                            }}
+                            alt={event.title}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            />
+                          //<img
+                            //src={item.event.images?.[0] || item.event.image}
+                            //alt=""
+                            //className="w-10 h-10 rounded-lg object-cover"
+                          ///>
                           <div className="flex-1 min-w-0">
                             <div className="font-medium text-gray-800 truncate">{item.event.title}</div>
                             <div className="text-sm text-gray-400 flex items-center gap-2">
