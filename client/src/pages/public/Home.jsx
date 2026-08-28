@@ -98,7 +98,7 @@ const categoryFeaturedImages = {
   Festival: 'https://images.pexels.com/photos/30274906/pexels-photo-30274906.jpeg?w=600&h=400&fit=crop',
   Party: 'https://images.pexels.com/photos/3171837/pexels-photo-3171837.jpeg?w=600&h=400&fit=crop',
   Anniversary: 'https://images.pexels.com/photos/1616113/pexels-photo-1616113.jpeg?w=600&h=400&fit=crop',
-  Birthday: 'https://images.pexels.com/photos/30870953/pexels-photo-30870953.jpeg?w=600&h=400&fit=crop';
+  Birthday: 'https://images.pexels.com/photos/30870953/pexels-photo-30870953.jpeg?w=600&h=400&fit=crop',
   Other: 'https://images.pexels.com/photos/1444442/pexels-photo-1444442.jpeg?w=600&h=400&fit=crop',
 };
 
@@ -332,21 +332,24 @@ export default function Home() {
                           }}
                           className="w-full px-4 py-3 text-left hover:bg-saffron-50 flex items-center gap-3 transition-colors"
                         >
-                          <img
-                            src={
-                              event.images?.[0] ||
-                              categoryFeaturedImages[event.category] ||'https://images.pexels.com/photos/1444442/pexels-photo-1444442.jpeg?w=600&h=400&fit=crop'}
-                            onError={(e) => {
-                              e.currentTarget.src =categoryFeaturedImages[event.category] ||'https://images.pexels.com/photos/1444442/pexels-photo-1444442.jpeg?w=600&h=400&fit=crop';
-                            }}
-                            alt={event.title}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+            
+                            <img
+                              src={
+                                item.event.images?.[0] ||
+                                categoryFeaturedImages[item.event.category] ||
+                                categoryFeaturedImages.Other
+                              }
+                              onError={(e) => {
+                                const fallback =
+                                  categoryFeaturedImages[item.event.category] ||
+                                  categoryFeaturedImages.Other;
+                                if (e.currentTarget.src !== fallback) {
+                                  e.currentTarget.src = fallback;
+                                }
+                              }}
+                              alt={item.event.title}
+                              className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
                             />
-                          //<img
-                            //src={item.event.images?.[0] || item.event.image}
-                            //alt=""
-                            //className="w-10 h-10 rounded-lg object-cover"
-                          ///>
                           <div className="flex-1 min-w-0">
                             <div className="font-medium text-gray-800 truncate">{item.event.title}</div>
                             <div className="text-sm text-gray-400 flex items-center gap-2">
@@ -483,8 +486,20 @@ export default function Home() {
               >
                 <div className="relative h-48 overflow-hidden">
                   <img
-                    src={event.images?.[0] || categoryFeaturedImages[event.category] || 'https://images.pexels.com/photos/30870953/pexels-photo-30870953.jpeg?w=600&h=400&fit=crop'}
+                    src={
+                      event.images?.[0] ||
+                      categoryFeaturedImages[event.category] ||
+                      categoryFeaturedImages.Other
+                    }
                     alt={event.title}
+                    onError={(e) => {
+                      const fallback =
+                        categoryFeaturedImages[event.category] ||
+                        categoryFeaturedImages.Other;
+                      if (e.currentTarget.src !== fallback) {
+                        e.currentTarget.src = fallback;
+                      }
+                    }}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
                   <div className="absolute top-3 left-3">
